@@ -1,0 +1,15 @@
+#pragma once
+
+// Type dependencies
+#include "system/basetypes.h"
+
+// =============================================================================
+// GLOBAL VARIABLES - Range 0x600000
+// =============================================================================
+
+// void*
+extern void* switchdataD_0060d0f8;
+
+// void*[7]
+extern void* g_FPExceptionJumpTable[7];
+

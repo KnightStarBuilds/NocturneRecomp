@@ -1,0 +1,157 @@
+#pragma once
+
+// =============================================================================
+// NETPLAY — HOST-SCHEDULED SAFE RESPAWN
+// =============================================================================
+//
+// An addition, not a reconstruction. The shipped game gives a network session
+// exactly one spawn point — every mission ships a single CHeroPlaceholder — and
+// it has to be used before anything is ready: CDemonMission::createHeros runs
+// ahead of loadSet, so there is no collision geometry to stand on and no camera
+// to be visible to. Any placement decided there is a guess, and a guess there
+// can put a guest below the floor or off a ledge.
+//
+// So guests are not placed there at all. createOneHero creates the hero with a
+// negative location.area_id, which holds it out of the world (see below), and
+// the host brings it in from the pause menu once it has walked somewhere worth
+// spawning into — by which time the set and camera are live and the spot can
+// actually be vetted.
+//
+// This adds a host-only pause-menu action that picks a spot that is
+//   - standing on real ground (the collision query returns a height, not NaN),
+//   - level with the host's own footing, so nobody is dropped down a shaft,
+//   - on the host's side of every wall: a clear voxel line from the host's
+//     footing at waist height, since the floor beyond a hallway wall passes
+//     the tests above and the camera frustum does not occlude,
+//   - inside the current static camera's frustum, scored towards the middle of
+//     frame so the player lands where the camera is actually aimed,
+//   - clear of the other heroes,
+// and falls back to the mission's authored placeholder spot — the one position
+// a designer signed off on — when no candidate qualifies.
+//
+// The same action doubles as an arcade continue: a hero that is dead when the
+// respawn lands is revived on the spot. A dead hero is never destroyed —
+// CCharacter::getDeathState just reads the motion controller's state name — so
+// restoring hit_points and jumping the motion back out of DEAD is the entire
+// revive. One button therefore covers both "bring my friend in" and "pick my
+// friend back up", and neither needs a rejoin, which the lockstep protocol
+// could not support anyway (see below).
+//
+// HOLDING A HERO OUT OF THE WORLD
+//
+// CDemonMission::buildActiveSetActorList admits an actor to the set only when
+// its location.area_id equals the mission's current_set_index, so a negative
+// area means not rendered, not processed, not collidable — while the hero still
+// sits on the mission's actor list, where teardown frees it like anything else.
+// It cannot simply be left uncreated: applySimFrameHistory dereferences
+// g_HeroActors[i] for every connected player on every frame.
+//
+// Giving it a real area is therefore what admits it, and the apply below
+// rebuilds the active set when it does. A guest whose hero is still held reads
+// as ALIVE (nothing has touched its motion state), so the game code treats
+// "held" as a second waiting state alongside "down".
+//
+// WHY IT IS SCHEDULED RATHER THAN APPLIED
+//
+// The netcode is deterministic lockstep: CNetGame::applySimFrameHistory
+// distributes only the random seed, the delta-time and the players' inputs,
+// and each machine simulates every hero locally. No position is ever sent, and
+// nothing reconciles a disagreement. Moving a hero on one machine alone would
+// therefore desync the session permanently.
+//
+// So the host broadcasts the chosen positions tagged with a sim-frame number a
+// little ahead of the current one, and every machine — the host included —
+// applies those absolute positions when its simulation reaches that frame, out
+// of the one hook both the server and client frame paths share. The packet is
+// re-sent every frame until it is due, because the transport is UDP and a lost
+// respawn would be a desync rather than a dropped update.
+//
+// The packet type is 0x15. The shipped protocol's own types stop at
+// PACKET_PLAYER_INPUT (0x10), and 0x11 to 0x14 are taken by net_sync,
+// net_weapon, net_mission and net_cheats. PACKET_UNUSED (0xE) is deliberately
+// NOT used: it is a gap inside the shipped enum's range, and leaving it alone
+// keeps the reconstruction's own numbering intact and every addition in one
+// contiguous block above it.
+//
+// Gated by NOCTURNE_AUTHENTIC_NETPLAY in shim_config_authentic.h: with authentic netplay
+// on, every entry point here compiles to nothing.
+
+#define NOCTURNE_NET_PACKET_RESPAWN 0x15
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// Records a mission's hero-placeholder spot as the known-safe fallback.
+// Called from CDemonMission::createOneHero, which is the last moment the
+// placeholder exists — createHeros deletes every one of them immediately
+// afterwards. Only the first spot of a mission is kept.
+void nocturne_net_respawn_note_placeholder(float x, float y, float z, int area_id);
+
+// Forgets the recorded placeholder. Called when a mission is torn down so a
+// stale spot from the previous map can never be used.
+void nocturne_net_respawn_clear_placeholder(void);
+
+// 1 when the pause menu should offer the respawn item: a host, in a running
+// network game, with at least one other player, outside a cinematic.
+int nocturne_net_respawn_available(void);
+
+// The area_id whose set should be loaded: the local hero's, or — while that
+// hero is still held out of the world and carries no real area — the first
+// hero that has one.
+//
+// CDemonMission::run and ::startMission both pick the set straight off
+// g_HeroActors[g_LocalHeroIndex], and loadSet indexes set_names[] with it
+// unchecked, so a held guest would read set_names[-1] and come up with no set
+// and no cameras at all.
+int nocturne_net_respawn_world_area(void);
+
+// 1 when this hero is in the world and may therefore be drawn.
+//
+// CDemonSet::buildDisplayList puts the local hero in sorted_render_actors[0]
+// unconditionally, bypassing the active set every other actor is filtered
+// through. That is sound in the game it was written for: the local hero is the
+// one the camera follows and is always on screen, so there was nothing to ask.
+//
+// A guest whose hero is still held carries area_id -1 and is absent from the
+// set, but the forced slot draws it regardless — so the guest sees its own
+// character standing unanimated on the mission's start placeholder for as long
+// as it spectates. The host never sees it, because that hero is neither in the
+// host's set nor the host's local hero.
+//
+// Null, or held out of the world, is 0. Outside a network game this is exactly
+// the null test the shipped code already made, so single player is unchanged.
+struct CHero;
+int nocturne_net_respawn_hero_in_world(struct CHero *hero);
+
+// Host action. Chooses the spots, schedules them, and broadcasts. Returns 1 if
+// a respawn was scheduled, 0 if the request could not be honoured.
+int nocturne_net_respawn_request(void);
+
+// Feeds one received packet of type NOCTURNE_NET_PACKET_RESPAWN to this module.
+// Returns 1 if it was a respawn packet and has been consumed.
+int nocturne_net_respawn_on_packet(const void *packet, int packet_size);
+
+// Called once per applied sim frame on every machine, from
+// CNetGame::applySimFrameHistory. Re-broadcasts a pending respawn while it is
+// still in the future, and applies it on the frame it was scheduled for.
+void nocturne_net_respawn_apply_if_due(int sequence_number);
+
+// Brings a dead hero back where it stands: restores hit_points to
+// max_hit_points, undoes a destroying death, and forces STAND so the motion
+// controller stops wanting the death state. Returns 1 if the hero was dead and
+// is now revived, 0 if it was alive and nothing changed. Used by the respawn
+// apply above and by CDemonMission::createHeros for a hero carried into the
+// next mission.
+int nocturne_net_respawn_revive(struct CHero *hero);
+
+// The host's game over in a network game, shown from inside the session loop
+// so the session survives it. "Continue" requests a respawn, which revives
+// every downed hero including the host; "Quit" ends the network game, which
+// releases the guests. The single-player list's "Load game" is not offered:
+// a network session has no saves. Returns 1 to carry on, 0 after quitting.
+int nocturne_net_host_death_menu(void);
+
+#ifdef __cplusplus
+}
+#endif

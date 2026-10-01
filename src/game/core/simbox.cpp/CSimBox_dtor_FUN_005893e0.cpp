@@ -1,0 +1,28 @@
+// Name: core_simbox.cpp_CSimBox_dtor_FUN_005893e0
+// Address: 005893e0
+// Address Range: [[005893e0, 00589444]]
+// Convention: __cdecl
+// Signature: CSimBox * __cdecl core_simbox_cpp_CSimBox_dtor_FUN_005893e0(CSimBox *this_ptr,uint flags)
+
+#include "nocturne.h"
+
+CSimBox * __cdecl core_simbox_cpp_CSimBox_dtor_FUN_005893e0(CSimBox *this_ptr,uint flags)
+
+{
+  CSimBox_ptr_856 pCVar1;
+  CSimBox *ptr;
+  void *ptr_00;
+  
+  if ((flags & 4) != 0) {
+    ptr_00 = __vec_delete(this_ptr,&g_CSimBoxTypeInfo);
+    shape_memdbg_cpp_free_FUN_005fe659(ptr_00);
+    return this_ptr;
+  }
+  pCVar1 = core_box_cpp_CBox_dtor_FUN_0041dd00(&this_ptr->physics_box,0);
+  ptr = (CSimBox *)core_actor_cpp_CDemonActor_dtor_FUN_00408a30(&ADJ(pCVar1)->base,1);
+  if ((flags & 2) == 0) {
+    return ptr;
+  }
+  shape_memdbg_cpp_debugFreeChecked_FUN_0050f210(ptr);
+  return ptr;
+}

@@ -1,0 +1,18 @@
+// Name: sound_sndmain.cpp_staticInit_FUN_005a3940
+// Address: 005a3940
+// Address Range: [[005a3940, 005a399b]]
+// Convention: __cdecl
+// Signature: void __cdecl sound_sndmain_cpp_staticInit_FUN_005a3940(void)
+
+#include "nocturne.h"
+
+void __cdecl sound_sndmain_cpp_staticInit_FUN_005a3940(void)
+
+{
+  g_SoundReferenceVolumeDistance = 20.0f / 4.0f;
+  __arrinit(g_SfxSlots,0x40,&g_SfxSlotTypeInfo);
+  __arrinit(g_SfxOptions,8,&g_SfxOptionsTypeInfo);
+  __arrinit(g_SfxSamples,0x40,&g_SfxSampleTypeInfo);
+  _atexit(&g_SfxSamplesDestructorNode);
+  return;
+}

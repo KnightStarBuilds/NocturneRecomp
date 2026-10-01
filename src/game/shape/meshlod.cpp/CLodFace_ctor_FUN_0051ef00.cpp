@@ -1,0 +1,16 @@
+// Name: shape_meshlod.cpp_CLodFace_ctor_FUN_0051ef00
+// Address: 0051ef00
+// Address Range: [[0051ef00, 0051ef1a]]
+// Convention: __cdecl
+// Signature: CLodFace * __cdecl shape_meshlod_cpp_CLodFace_ctor_FUN_0051ef00(CLodFace *this_ptr)
+
+#include "nocturne.h"
+
+CLodFace * __cdecl shape_meshlod_cpp_CLodFace_ctor_FUN_0051ef00(CLodFace *this_ptr)
+
+{
+  CLodFace_ptr_84 pvVar1;
+  
+  pvVar1 = __arrinit(this_ptr->edge_perpendiculars,3,&g_CVectorTypeInfo);
+  return ADJ(pvVar1);
+}

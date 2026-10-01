@@ -1,0 +1,595 @@
+#include "nocturne.h"
+
+// =============================================================================
+// GLOBAL VARIABLE DEFINITIONS - Range 0x610000
+// =============================================================================
+
+// ACCEPT_FUNC*
+ACCEPT_FUNC* g_acceptFunc = nullptr; // DAT_80000001
+
+// BIND_FUNC*
+BIND_FUNC* g_bindFunc = nullptr; // DAT_80000002
+
+// BRING_WINDOW_TO_TOP_FUNC*
+BRING_WINDOW_TO_TOP_FUNC* g_BringWindowToTopFunc = nullptr; // DAT_00211a42
+
+// CHAR_UPPER_BUFF_A_FUNC*
+CHAR_UPPER_BUFF_A_FUNC* g_CharUpperBuffAFunc = nullptr; // DAT_00211a56
+
+// CLOSE_CLIPBOARD_FUNC*
+CLOSE_CLIPBOARD_FUNC* g_CloseClipboardFunc = nullptr; // DAT_00211a68
+
+// CLOSE_HANDLE_FUNC*
+CLOSE_HANDLE_FUNC* g_CloseHandleFunc = nullptr; // DAT_00211c38
+
+// CLOSE_SOCKET_FUNC*
+CLOSE_SOCKET_FUNC* g_closesocketFunc = nullptr; // DAT_80000003
+
+// CONNECT_FUNC*
+CONNECT_FUNC* g_connectFunc = nullptr; // DAT_80000004
+
+// CREATE_BRUSH_INDIRECT_FUNC*
+CREATE_BRUSH_INDIRECT_FUNC* g_CreateBrushIndirectFunc = nullptr; // DAT_00211736
+
+// CREATE_COMPATIBLE_DC_FUNC*
+CREATE_COMPATIBLE_DC_FUNC* g_CreateCompatibleDCFunc = nullptr; // DAT_0021174c
+
+// CREATE_DIB_SECTION_FUNC*
+CREATE_DIB_SECTION_FUNC* g_CreateDIBSectionFunc = nullptr; // DAT_00211762
+
+// CREATE_DIRECTORY_A_FUNC*
+CREATE_DIRECTORY_A_FUNC* g_CreateDirectoryAFunc = nullptr; // DAT_00211c46
+
+// CREATE_EVENT_A_FUNC*
+CREATE_EVENT_A_FUNC* g_CreateEventAFunc = nullptr; // DAT_00211c5a
+
+// CREATE_FILE_A_FUNC*
+CREATE_FILE_A_FUNC* g_CreateFileAFunc = nullptr; // DAT_00211c6a
+
+// CREATE_FONT_A_FUNC*
+CREATE_FONT_A_FUNC* g_CreateFontAFunc = nullptr; // DAT_00211776
+
+// CREATE_MUTEX_A_FUNC*
+CREATE_MUTEX_A_FUNC* g_CreateMutexAFunc = nullptr; // DAT_00211c78
+
+// CREATE_PROCESS_A_FUNC*
+CREATE_PROCESS_A_FUNC* g_CreateProcessAFunc = nullptr; // DAT_00211c88
+
+// CREATE_THREAD_FUNC*
+CREATE_THREAD_FUNC* g_CreateThreadFunc = nullptr; // DAT_00211c9a
+
+// CREATE_WINDOW_EX_A_FUNC*
+CREATE_WINDOW_EX_A_FUNC* g_CreateWindowExAFunc = nullptr; // DAT_00211a7a
+
+// DEF_WINDOW_PROC_A_FUNC*
+DEF_WINDOW_PROC_A_FUNC* g_DefWindowProcAFunc = nullptr; // DAT_00211a8c
+
+// DELETE_CRITICAL_SECTION_FUNC*
+DELETE_CRITICAL_SECTION_FUNC* g_DeleteCriticalSectionFunc = nullptr; // DAT_00211caa
+
+// DELETE_DC_FUNC*
+DELETE_DC_FUNC* g_DeleteDCFunc = nullptr; // DAT_00211784
+
+// DELETE_FILE_A_FUNC*
+DELETE_FILE_A_FUNC* g_DeleteFileAFunc = nullptr; // DAT_00211cc2
+
+// DELETE_OBJECT_FUNC*
+DELETE_OBJECT_FUNC* g_DeleteObjectFunc = nullptr; // DAT_00211790
+
+// DIRECT_DRAW_CREATE_FUNC*
+DIRECT_DRAW_CREATE_FUNC* g_DirectDrawCreateFunc = nullptr; // DAT_0021230c
+
+// DIRECT_SOUND_CREATE_FUNC*
+DIRECT_SOUND_CREATE_FUNC* g_DirectSoundCreateFunc = nullptr; // DAT_80000001
+
+// DIRECT_SOUND_ENUMERATE_A_FUNC*
+DIRECT_SOUND_ENUMERATE_A_FUNC* g_DirectSoundEnumerateAFunc = nullptr; // DAT_80000002
+
+// DISPATCH_MESSAGE_A_FUNC*
+DISPATCH_MESSAGE_A_FUNC* g_DispatchMessageAFunc = nullptr; // DAT_00211a9e
+
+// DOS_DATE_TIME_TO_FILE_TIME_FUNC*
+DOS_DATE_TIME_TO_FILE_TIME_FUNC* g_DosDateTimeToFileTimeFunc = nullptr; // DAT_00211cd0
+
+// DUPLICATE_HANDLE_FUNC*
+DUPLICATE_HANDLE_FUNC* g_DuplicateHandleFunc = nullptr; // DAT_00211ce8
+
+// ENTER_CRITICAL_SECTION_FUNC*
+ENTER_CRITICAL_SECTION_FUNC* g_EnterCriticalSectionFunc = nullptr; // DAT_00211cfa
+
+// EXIT_PROCESS_FUNC*
+EXIT_PROCESS_FUNC* g_ExitProcessFunc = nullptr; // DAT_00211d12
+
+// EXIT_THREAD_FUNC*
+EXIT_THREAD_FUNC* g_ExitThreadFunc = nullptr; // DAT_00211d20
+
+// FILE_TIME_TO_DOS_DATE_TIME_FUNC*
+FILE_TIME_TO_DOS_DATE_TIME_FUNC* g_FileTimeToDosDateTimeFunc = nullptr; // DAT_00211d2e
+
+// FILE_TIME_TO_LOCAL_FILE_TIME_FUNC*
+FILE_TIME_TO_LOCAL_FILE_TIME_FUNC* g_FileTimeToLocalFileTimeFunc = nullptr; // DAT_00211d46
+
+// FILE_TIME_TO_SYSTEM_TIME_FUNC*
+FILE_TIME_TO_SYSTEM_TIME_FUNC* g_FileTimeToSystemTimeFunc = nullptr; // DAT_00211d60
+
+// FIND_CLOSE_FUNC*
+FIND_CLOSE_FUNC* g_FindCloseFunc = nullptr; // DAT_00211d78
+
+// FIND_FIRST_FILE_A_FUNC*
+FIND_FIRST_FILE_A_FUNC* g_FindFirstFileAFunc = nullptr; // DAT_00211d84
+
+// FIND_NEXT_FILE_A_FUNC*
+FIND_NEXT_FILE_A_FUNC* g_FindNextFileAFunc = nullptr; // DAT_00211d96
+
+// FIND_WINDOW_A_FUNC*
+FIND_WINDOW_A_FUNC* g_FindWindowAFunc = nullptr; // DAT_00211ab2
+
+// FLUSH_FILE_BUFFERS_FUNC*
+FLUSH_FILE_BUFFERS_FUNC* g_FlushFileBuffersFunc = nullptr; // DAT_00211da6
+
+// FREE_ENVIRONMENT_STRINGS_A_FUNC*
+FREE_ENVIRONMENT_STRINGS_A_FUNC* g_FreeEnvironmentStringsAFunc = nullptr; // DAT_00211dba
+
+// FREE_LIBRARY_FUNC*
+FREE_LIBRARY_FUNC* g_FreeLibraryFunc = nullptr; // DAT_00211dd4
+
+// GET_ACP_FUNC*
+GET_ACP_FUNC* g_GetACPFunc = nullptr; // DAT_00211de2
+
+// GET_CLIENT_RECT_FUNC*
+GET_CLIENT_RECT_FUNC* g_GetClientRectFunc = nullptr; // DAT_00211ac0
+
+// GET_CLIPBOARD_DATA_FUNC*
+GET_CLIPBOARD_DATA_FUNC* g_GetClipboardDataFunc = nullptr; // DAT_00211ad0
+
+// GET_COMMAND_LINE_A_FUNC*
+GET_COMMAND_LINE_A_FUNC* g_GetCommandLineAFunc = nullptr; // DAT_00211df8
+
+// GET_COMMAND_LINE_W_FUNC*
+GET_COMMAND_LINE_W_FUNC* g_GetCommandLineWFunc = nullptr; // DAT_00211e0a
+
+// GET_COMPUTER_NAME_A_FUNC*
+GET_COMPUTER_NAME_A_FUNC* g_GetComputerNameAFunc = nullptr; // DAT_00211e1c
+
+// GET_CONSOLE_MODE_FUNC*
+GET_CONSOLE_MODE_FUNC* g_GetConsoleModeFunc = nullptr; // DAT_00211e30
+
+// GET_CP_INFO_FUNC*
+GET_CP_INFO_FUNC* g_GetCPInfoFunc = nullptr; // DAT_00211dec
+
+// GET_CURRENT_DIRECTORY_A_FUNC*
+GET_CURRENT_DIRECTORY_A_FUNC* g_GetCurrentDirectoryAFunc = nullptr; // DAT_00211e42
+
+// GET_CURRENT_PROCESS_FUNC*
+GET_CURRENT_PROCESS_FUNC* g_GetCurrentProcessFunc = nullptr; // DAT_00211e5a
+
+// GET_CURRENT_PROCESS_ID_FUNC*
+GET_CURRENT_PROCESS_ID_FUNC* g_GetCurrentProcessIdFunc = nullptr; // DAT_00211e6e
+
+// GET_CURRENT_THREAD_FUNC*
+GET_CURRENT_THREAD_FUNC* g_GetCurrentThreadFunc = nullptr; // DAT_00211e9a
+
+// GET_CURRENT_THREAD_ID_FUNC*
+GET_CURRENT_THREAD_ID_FUNC* g_GetCurrentThreadIdFunc = nullptr; // DAT_00211e84
+
+// GET_ENVIRONMENT_STRINGS_FUNC*
+GET_ENVIRONMENT_STRINGS_FUNC* g_GetEnvironmentStringsFunc = nullptr; // DAT_00211eae
+
+// GET_EXIT_CODE_PROCESS_FUNC*
+GET_EXIT_CODE_PROCESS_FUNC* g_GetExitCodeProcessFunc = nullptr; // DAT_00211ec6
+
+// GET_FILE_ATTRIBUTES_A_FUNC*
+GET_FILE_ATTRIBUTES_A_FUNC* g_GetFileAttributesAFunc = nullptr; // DAT_00211edc
+
+// GET_FILE_TIME_FUNC*
+GET_FILE_TIME_FUNC* g_GetFileTimeFunc = nullptr; // DAT_00211ef2
+
+// GET_FILE_TYPE_FUNC*
+GET_FILE_TYPE_FUNC* g_GetFileTypeFunc = nullptr; // DAT_00211f00
+
+// GET_FULL_PATH_NAME_A_FUNC*
+GET_FULL_PATH_NAME_A_FUNC* g_GetFullPathNameAFunc = nullptr; // DAT_00211f0e
+
+// GET_KEY_NAME_TEXT_A_FUNC*
+GET_KEY_NAME_TEXT_A_FUNC* g_GetKeyNameTextAFunc = nullptr; // DAT_00211ae4
+
+// GET_LAST_ACTIVE_POPUP_FUNC*
+GET_LAST_ACTIVE_POPUP_FUNC* g_GetLastActivePopupFunc = nullptr; // DAT_00211af6
+
+// GET_LAST_ERROR_FUNC*
+GET_LAST_ERROR_FUNC* g_GetLastErrorFunc = nullptr; // DAT_00211f22
+
+// GET_LOCAL_TIME_FUNC*
+GET_LOCAL_TIME_FUNC* g_GetLocalTimeFunc = nullptr; // DAT_00211f32
+
+// GET_MODULE_FILE_NAME_A_FUNC*
+GET_MODULE_FILE_NAME_A_FUNC* g_GetModuleFileNameAFunc = nullptr; // DAT_00211f42
+
+// GET_MODULE_FILE_NAME_W_FUNC*
+GET_MODULE_FILE_NAME_W_FUNC* g_GetModuleFileNameWFunc = nullptr; // DAT_00211f58
+
+// GET_MODULE_HANDLE_A_FUNC*
+GET_MODULE_HANDLE_A_FUNC* g_GetModuleHandleAFunc = nullptr; // DAT_00211f6e
+
+// GET_OEMCP_FUNC*
+GET_OEMCP_FUNC* g_GetOEMCPFunc = nullptr; // DAT_00211f82
+
+// GET_PROC_ADDRESS_FUNC*
+GET_PROC_ADDRESS_FUNC* g_GetProcAddressFunc = nullptr; // DAT_00211f8e
+
+// GET_SOCK_NAME_FUNC*
+GET_SOCK_NAME_FUNC* g_getsocknameFunc = nullptr; // DAT_80000006
+
+// GET_STD_HANDLE_FUNC*
+GET_STD_HANDLE_FUNC* g_GetStdHandleFunc = nullptr; // DAT_00211fa0
+
+// GET_STOCK_OBJECT_FUNC*
+GET_STOCK_OBJECT_FUNC* g_GetStockObjectFunc = nullptr; // DAT_002117a0
+
+// GET_TEXT_EXTENT_POINT32_A_FUNC*
+GET_TEXT_EXTENT_POINT32_A_FUNC* g_GetTextExtentPoint32A = nullptr; // DAT_002117b2
+
+// GET_TIME_ZONE_INFORMATION_FUNC*
+GET_TIME_ZONE_INFORMATION_FUNC* g_GetTimeZoneInformationFunc = nullptr; // DAT_00211fb0
+
+// GET_USER_NAME_A_FUNC*
+GET_USER_NAME_A_FUNC* g_GetUserNameAFunc = nullptr; // DAT_002119a4
+
+// GET_VERSION_FUNC*
+GET_VERSION_FUNC* g_GetVersionFunc = nullptr; // DAT_00211fca
+
+// GLOBAL_ALLOC_FUNC*
+GLOBAL_ALLOC_FUNC* g_GlobalAllocFunc = nullptr; // DAT_00211fd8
+
+// GLOBAL_FREE_FUNC*
+GLOBAL_FREE_FUNC* g_GlobalFreeFunc = nullptr; // DAT_00211fe6
+
+// GLOBAL_LOCK_FUNC*
+GLOBAL_LOCK_FUNC* g_GlobalLockFunc = nullptr; // DAT_00211ff4
+
+// GLOBAL_MEMORY_STATUS_FUNC*
+GLOBAL_MEMORY_STATUS_FUNC* g_GlobalMemoryStatusFunc = nullptr; // DAT_00212002
+
+// GLOBAL_UNLOCK_FUNC*
+GLOBAL_UNLOCK_FUNC* g_GlobalUnlockFunc = nullptr; // DAT_00212018
+
+// HOST_TO_NETWORK_SHORT_FUNC*
+HOST_TO_NETWORK_SHORT_FUNC* g_htonsFunc = nullptr; // DAT_80000009
+
+// IMPERSONATE_LOGGED_ON_USER_FUNC*
+IMPERSONATE_LOGGED_ON_USER_FUNC* g_ImpersonateLoggedOnUserFunc = nullptr; // DAT_002119b4
+
+// INITIALIZE_CRITICAL_SECTION_FUNC*
+INITIALIZE_CRITICAL_SECTION_FUNC* g_InitializeCriticalSectionFunc = nullptr; // DAT_00212028
+
+// INVALIDATE_RECT_FUNC*
+INVALIDATE_RECT_FUNC* g_InvalidateRectFunc = nullptr; // DAT_00211b0c
+
+// IOCTL_SOCKET_FUNC*
+IOCTL_SOCKET_FUNC* g_ioctlsocketFunc = nullptr; // DAT_8000000c
+
+// IS_ICONIC_FUNC*
+IS_ICONIC_FUNC* g_IsIconicFunc = nullptr; // DAT_00211b1e
+
+// JOY_GET_DEV_CAPS_A_FUNC*
+JOY_GET_DEV_CAPS_A_FUNC* g_joyGetDevCapsAFunc = nullptr; // DAT_0021181c
+
+// JOY_GET_POS_FUNC*
+JOY_GET_POS_FUNC* g_joyGetPosFunc = nullptr; // DAT_0021182e
+
+// LEAVE_CRITICAL_SECTION_FUNC*
+LEAVE_CRITICAL_SECTION_FUNC* g_LeaveCriticalSectionFunc = nullptr; // DAT_00212044
+
+// LISTEN_FUNC*
+LISTEN_FUNC* g_listenFunc = nullptr; // DAT_8000000d
+
+// LOAD_CURSOR_A_FUNC*
+LOAD_CURSOR_A_FUNC* g_LoadCursorAFunc = nullptr; // DAT_00211b2a
+
+// LOAD_ICON_A_FUNC*
+LOAD_ICON_A_FUNC* g_LoadIconAFunc = nullptr; // DAT_00211b38
+
+// LOAD_LIBRARY_A_FUNC*
+LOAD_LIBRARY_A_FUNC* g_LoadLibraryAFunc = nullptr; // DAT_0021205c
+
+// LOCAL_FILE_TIME_TO_FILE_TIME_FUNC*
+LOCAL_FILE_TIME_TO_FILE_TIME_FUNC* g_LocalFileTimeToFileTimeFunc = nullptr; // DAT_0021206c
+
+// LOGON_USER_A_FUNC*
+LOGON_USER_A_FUNC* g_LogonUserAFunc = nullptr; // DAT_002119ce
+
+// MCI_GET_ERROR_STRING_A_FUNC*
+MCI_GET_ERROR_STRING_A_FUNC* g_mciGetErrorStringAFunc = nullptr; // DAT_0021183a
+
+// MCI_SEND_STRING_A_FUNC*
+MCI_SEND_STRING_A_FUNC* g_mciSendStringAFunc = nullptr; // DAT_00211850
+
+// MESSAGE_BOX_A_FUNC*
+MESSAGE_BOX_A_FUNC* g_MessageBoxAFunc = nullptr; // DAT_00211b44
+
+// MOVE_FILE_A_FUNC*
+MOVE_FILE_A_FUNC* g_MoveFileAFunc = nullptr; // DAT_00212086
+
+// MOVE_WINDOW_FUNC*
+MOVE_WINDOW_FUNC* g_MoveWindowFunc = nullptr; // DAT_00211b52
+
+// MULTI_BYTE_TO_WIDE_CHAR_FUNC*
+MULTI_BYTE_TO_WIDE_CHAR_FUNC* g_MultiByteToWideCharFunc = nullptr; // DAT_00212092
+
+// NETWORK_TO_HOST_SHORT_FUNC*
+NETWORK_TO_HOST_SHORT_FUNC* g_ntohsFunc = nullptr; // DAT_8000000f
+
+// OPEN_CLIPBOARD_FUNC*
+OPEN_CLIPBOARD_FUNC* g_OpenClipboardFunc = nullptr; // DAT_00211b60
+
+// PEEK_MESSAGE_A_FUNC*
+PEEK_MESSAGE_A_FUNC* g_PeekMessageAFunc = nullptr; // DAT_00211b70
+
+// POST_QUIT_MESSAGE_FUNC*
+POST_QUIT_MESSAGE_FUNC* g_PostQuitMessageFunc = nullptr; // DAT_00211b80
+
+// QUERY_PERFORMANCE_COUNTER_FUNC*
+QUERY_PERFORMANCE_COUNTER_FUNC* g_QueryPerformanceCounterFunc = nullptr; // DAT_002120a8
+
+// QUERY_PERFORMANCE_FREQUENCY_FUNC*
+QUERY_PERFORMANCE_FREQUENCY_FUNC* g_QueryPerformanceFrequencyFunc = nullptr; // DAT_002120c2
+
+// READ_CONSOLE_INPUT_A_FUNC*
+READ_CONSOLE_INPUT_A_FUNC* g_ReadConsoleInputAFunc = nullptr; // DAT_002120de
+
+// READ_FILE_FUNC*
+READ_FILE_FUNC* g_ReadFileFunc = nullptr; // DAT_002120f2
+
+// RECTANGLE_FUNC*
+RECTANGLE_FUNC* g_RectangleFunc = nullptr; // DAT_002117ca
+
+// RECV_FROM_FUNC*
+RECV_FROM_FUNC* g_recvfromFunc = nullptr; // DAT_80000011
+
+// RECV_FUNC*
+RECV_FUNC* g_recvFunc = nullptr; // DAT_80000010
+
+// REGISTER_CLASS_A_FUNC*
+REGISTER_CLASS_A_FUNC* g_RegisterClassAFunc = nullptr; // DAT_00211b92
+
+// REG_CLOSE_KEY_FUNC*
+REG_CLOSE_KEY_FUNC* g_RegCloseKeyFunc = nullptr; // DAT_002119dc
+
+// REG_CREATE_KEY_EX_A_FUNC*
+REG_CREATE_KEY_EX_A_FUNC* g_RegCreateKeyExAFunc = nullptr; // DAT_002119ea
+
+// REG_OPEN_KEY_EX_A_FUNC*
+REG_OPEN_KEY_EX_A_FUNC* g_RegOpenKeyExAFunc = nullptr; // DAT_002119fc
+
+// REG_QUERY_VALUE_EX_A_FUNC*
+REG_QUERY_VALUE_EX_A_FUNC* g_RegQueryValueExAFunc = nullptr; // DAT_00211a0c
+
+// REG_SET_VALUE_EX_A_FUNC*
+REG_SET_VALUE_EX_A_FUNC* g_RegSetValueExAFunc = nullptr; // DAT_00211a20
+
+// RELEASE_MUTEX_FUNC*
+RELEASE_MUTEX_FUNC* g_ReleaseMutexFunc = nullptr; // DAT_002120fe
+
+// REVERT_TO_SELF_FUNC*
+REVERT_TO_SELF_FUNC* g_RevertToSelfFunc = nullptr; // DAT_00211a32
+
+// SELECT_OBJECT_FUNC*
+SELECT_OBJECT_FUNC* g_SelectObjectFunc = nullptr; // DAT_002117d6
+
+// SEND_FUNC*
+SEND_FUNC* g_sendFunc = nullptr; // DAT_80000013
+
+// SEND_TO_FUNC*
+SEND_TO_FUNC* g_sendtoFunc = nullptr; // DAT_80000014
+
+// SET_BK_COLOR_FUNC*
+SET_BK_COLOR_FUNC* g_SetBkColorFunc = nullptr; // DAT_002117e6
+
+// SET_BK_MODE_FUNC*
+SET_BK_MODE_FUNC* g_SetBkModeFunc = nullptr; // DAT_002117f4
+
+// SET_CLIPBOARD_DATA_FUNC*
+SET_CLIPBOARD_DATA_FUNC* g_SetClipboardDataFunc = nullptr; // DAT_00211ba4
+
+// SET_CONSOLE_CTRL_HANDLER_FUNC*
+SET_CONSOLE_CTRL_HANDLER_FUNC* g_SetConsoleCtrlHandlerFunc = nullptr; // DAT_0021210e
+
+// SET_CONSOLE_MODE_FUNC*
+SET_CONSOLE_MODE_FUNC* g_SetConsoleModeFunc = nullptr; // DAT_00212126
+
+// SET_CURRENT_DIRECTORY_A_FUNC*
+SET_CURRENT_DIRECTORY_A_FUNC* g_SetCurrentDirectoryAFunc = nullptr; // DAT_00212138
+
+// SET_CURSOR_FUNC*
+SET_CURSOR_FUNC* g_SetCursorFunc = nullptr; // DAT_00211bc8
+
+// SET_CURSOR_POS_FUNC*
+SET_CURSOR_POS_FUNC* g_SetCursorPosFunc = nullptr; // DAT_00211bb8
+
+// SET_END_OF_FILE_FUNC*
+SET_END_OF_FILE_FUNC* g_SetEndOfFileFunc = nullptr; // DAT_00212150
+
+// SET_ENVIRONMENT_VARIABLE_A_FUNC*
+SET_ENVIRONMENT_VARIABLE_A_FUNC* g_SetEnvironmentVariableAFunc = nullptr; // DAT_00212160
+
+// SET_ENVIRONMENT_VARIABLE_W_FUNC*
+SET_ENVIRONMENT_VARIABLE_W_FUNC* g_SetEnvironmentVariableWFunc = nullptr; // DAT_0021217a
+
+// SET_EVENT_FUNC*
+SET_EVENT_FUNC* g_SetEventFunc = nullptr; // DAT_00212194
+
+// SET_FILE_ATTRIBUTES_A_FUNC*
+SET_FILE_ATTRIBUTES_A_FUNC* g_SetFileAttributesAFunc = nullptr; // DAT_002121a0
+
+// SET_FILE_POINTER_FUNC*
+SET_FILE_POINTER_FUNC* g_SetFilePointerFunc = nullptr; // DAT_002121b6
+
+// SET_FILE_TIME_FUNC*
+SET_FILE_TIME_FUNC* g_SetFileTimeFunc = nullptr; // DAT_002121c8
+
+// SET_FOCUS_FUNC*
+SET_FOCUS_FUNC* g_SetFocusFunc = nullptr; // DAT_00211bd4
+
+// SET_FOREGROUND_WINDOW_FUNC*
+SET_FOREGROUND_WINDOW_FUNC* g_SetForegroundWindowFunc = nullptr; // DAT_00211be0
+
+// SET_LAST_ERROR_FUNC*
+SET_LAST_ERROR_FUNC* g_SetLastErrorFunc = nullptr; // DAT_002121d6
+
+// SET_RECT_EMPTY_FUNC*
+SET_RECT_EMPTY_FUNC* g_SetRectEmptyFunc = nullptr; // DAT_00211bf6
+
+// SET_SOCK_OPT_FUNC*
+SET_SOCK_OPT_FUNC* g_setsockoptFunc = nullptr; // DAT_80000015
+
+// SET_STD_HANDLE_FUNC*
+SET_STD_HANDLE_FUNC* g_SetStdHandleFunc = nullptr; // DAT_002121e6
+
+// SET_TEXT_COLOR_FUNC*
+SET_TEXT_COLOR_FUNC* g_SetTextColorFunc = nullptr; // DAT_00211800
+
+// SET_THREAD_PRIORITY_FUNC*
+SET_THREAD_PRIORITY_FUNC* g_SetThreadPriorityFunc = nullptr; // DAT_002121f6
+
+// SET_UNHANDLED_EXCEPTION_FILTER_FUNC*
+SET_UNHANDLED_EXCEPTION_FILTER_FUNC* g_SetUnhandledExceptionFilterFunc = nullptr; // DAT_0021220a
+
+// SHOW_WINDOW_FUNC*
+SHOW_WINDOW_FUNC* g_ShowWindowFunc = nullptr; // DAT_00211c06
+
+// SLEEP_FUNC*
+SLEEP_FUNC* g_SleepFunc = nullptr; // DAT_00212228
+
+// SOCKET_FUNC*
+SOCKET_FUNC* g_socketFunc = nullptr; // DAT_80000017
+
+// SYSTEM_TIME_TO_FILE_TIME_FUNC*
+SYSTEM_TIME_TO_FILE_TIME_FUNC* g_SystemTimeToFileTimeFunc = nullptr; // DAT_00212230
+
+// TEXT_OUT_A_FUNC*
+TEXT_OUT_A_FUNC* g_TextOutAFunc = nullptr; // DAT_00211810
+
+// TIME_BEGIN_PERIOD_FUNC*
+TIME_BEGIN_PERIOD_FUNC* g_timeBeginPeriodFunc = nullptr; // DAT_00211862
+
+// TIME_END_PERIOD_FUNC*
+TIME_END_PERIOD_FUNC* g_timeEndPeriodFunc = nullptr; // DAT_00211874
+
+// TIME_GET_TIME_FUNC*
+TIME_GET_TIME_FUNC* g_timeGetTimeFunc = nullptr; // DAT_00211884
+
+// TLS_ALLOC_FUNC*
+TLS_ALLOC_FUNC* g_TlsAllocFunc = nullptr; // DAT_00212248
+
+// TLS_FREE_FUNC*
+TLS_FREE_FUNC* g_TlsFreeFunc = nullptr; // DAT_00212254
+
+// TLS_GET_VALUE_FUNC*
+TLS_GET_VALUE_FUNC* g_TlsGetValueFunc = nullptr; // DAT_0021225e
+
+// TLS_SET_VALUE_FUNC*
+TLS_SET_VALUE_FUNC* g_TlsSetValueFunc = nullptr; // DAT_0021226c
+
+// TRANSLATE_MESSAGE_FUNC*
+TRANSLATE_MESSAGE_FUNC* g_TranslateMessageFunc = nullptr; // DAT_00211c14
+
+// UNHANDLED_EXCEPTION_FILTER_FUNC*
+UNHANDLED_EXCEPTION_FILTER_FUNC* g_UnhandledExceptionFilterFunc = nullptr; // DAT_0021227a
+
+// UPDATE_WINDOW_FUNC*
+UPDATE_WINDOW_FUNC* g_UpdateWindowFunc = nullptr; // DAT_00211c28
+
+// VIRTUAL_ALLOC_FUNC*
+VIRTUAL_ALLOC_FUNC* g_VirtualAllocFunc = nullptr; // DAT_00212296
+
+// VIRTUAL_FREE_FUNC*
+VIRTUAL_FREE_FUNC* g_VirtualFreeFunc = nullptr; // DAT_002122a6
+
+// VIRTUAL_QUERY_FUNC*
+VIRTUAL_QUERY_FUNC* g_VirtualQueryFunc = nullptr; // DAT_002122b4
+
+// WAIT_FOR_SINGLE_OBJECT_FUNC*
+WAIT_FOR_SINGLE_OBJECT_FUNC* g_WaitForSingleObjectFunc = nullptr; // DAT_002122c4
+
+// WAVE_IN_ADD_BUFFER_FUNC*
+WAVE_IN_ADD_BUFFER_FUNC* g_waveInAddBufferFunc = nullptr; // DAT_00211892
+
+// WAVE_IN_CLOSE_FUNC*
+WAVE_IN_CLOSE_FUNC* g_waveInCloseFunc = nullptr; // DAT_002118a4
+
+// WAVE_IN_GET_DEV_CAPS_A_FUNC*
+WAVE_IN_GET_DEV_CAPS_A_FUNC* g_waveInGetDevCapsAFunc = nullptr; // DAT_002118b2
+
+// WAVE_IN_OPEN_FUNC*
+WAVE_IN_OPEN_FUNC* g_waveInOpenFunc = nullptr; // DAT_002118c6
+
+// WAVE_IN_PREPARE_HEADER_FUNC*
+WAVE_IN_PREPARE_HEADER_FUNC* g_waveInPrepareHeaderFunc = nullptr; // DAT_002118d4
+
+// WAVE_IN_RESET_FUNC*
+WAVE_IN_RESET_FUNC* g_waveInResetFunc = nullptr; // DAT_002118ea
+
+// WAVE_IN_START_FUNC*
+WAVE_IN_START_FUNC* g_waveInStartFunc = nullptr; // DAT_002118f8
+
+// WAVE_IN_UNPREPARE_HEADER_FUNC*
+WAVE_IN_UNPREPARE_HEADER_FUNC* g_waveInUnprepareHeaderFunc = nullptr; // DAT_00211906
+
+// WAVE_OUT_CLOSE_FUNC*
+WAVE_OUT_CLOSE_FUNC* g_waveOutCloseFunc = nullptr; // DAT_0021191e
+
+// WAVE_OUT_GET_DEV_CAPS_A_FUNC*
+WAVE_OUT_GET_DEV_CAPS_A_FUNC* g_waveOutGetDevCapsAFunc = nullptr; // DAT_0021192e
+
+// WAVE_OUT_OPEN_FUNC*
+WAVE_OUT_OPEN_FUNC* g_waveOutOpenFunc = nullptr; // DAT_00211944
+
+// WAVE_OUT_PREPARE_HEADER_FUNC*
+WAVE_OUT_PREPARE_HEADER_FUNC* g_waveOutPrepareHeaderFunc = nullptr; // DAT_00211952
+
+// WAVE_OUT_RESET_FUNC*
+WAVE_OUT_RESET_FUNC* g_waveOutResetFunc = nullptr; // DAT_0021196a
+
+// WAVE_OUT_UNPREPARE_HEADER_FUNC*
+WAVE_OUT_UNPREPARE_HEADER_FUNC* g_waveOutUnprepareHeaderFunc = nullptr; // DAT_0021197a
+
+// WAVE_OUT_WRITE_FUNC*
+WAVE_OUT_WRITE_FUNC* g_waveOutWriteFunc = nullptr; // DAT_00211994
+
+// WIDE_CHAR_TO_MULTI_BYTE_FUNC*
+WIDE_CHAR_TO_MULTI_BYTE_FUNC* g_WideCharToMultiByteFunc = nullptr; // DAT_002122da
+
+// WRITE_CONSOLE_A_FUNC*
+WRITE_CONSOLE_A_FUNC* g_WriteConsoleAFunc = nullptr; // DAT_002122f0
+
+// WRITE_FILE_FUNC*
+WRITE_FILE_FUNC* g_WriteFileFunc = nullptr; // DAT_00212300
+
+// WSA_CLEANUP_FUNC*
+WSA_CLEANUP_FUNC* g_WSACleanupFunc = nullptr; // DAT_80000074
+
+// WSA_STARTUP_FUNC*
+WSA_STARTUP_FUNC* g_WSAStartupFunc = nullptr; // DAT_80000073
+
+// dword
+dword DWORD_00611000 = 0x2110B4;
+dword DAT_00611004 = 0;
+dword DAT_00611008 = 0;
+dword DAT_00611018 = 0;
+dword DAT_0061101C = 0;
+dword DAT_0061102C = 0;
+dword DAT_00611030 = 0;
+dword DAT_00611040 = 0;
+dword DAT_00611044 = 0;
+dword DAT_00611054 = 0;
+dword DAT_00611058 = 0;
+dword DAT_00611068 = 0;
+dword DAT_0061106C = 0;
+dword DAT_0061107C = 0;
+dword DAT_00611080 = 0;
+dword DAT_00611090 = 0;
+dword DAT_00611094 = 0;
+
+// int
+int INT_00613000 = 0x10101;
+

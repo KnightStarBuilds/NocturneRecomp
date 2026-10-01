@@ -1,0 +1,100 @@
+{
+  "opening": {
+    "seconds": 110,
+    "capture_at": "1,5,20,45,75,95,105",
+    "keys": ""
+  },
+  "menu": {
+    "seconds": 25,
+    "capture_at": "1,5,10,20",
+    "keys": "3:Escape"
+  },
+  "cursor-menus": {
+    "seconds": 40,
+    "capture_at": "5,20,26,26.07,26.14,26.21,28,34,38",
+    "keys": "3:Escape,6:Return,7:Down,8:Left Ctrl,8:Left Shift,8:Return,9:Down,9.3:Down,10:Return,11:Down,12:Return,24:Escape,30:Return",
+    "mouse_at": "4:400:240,18:400:240,25:350:240,32:400:240",
+    "mission": "chicago1.msn",
+    "purpose": "Capture main menu, Chicago gameplay, Escape pause, and Return resume. Synthetic mouse is at logical 400,240 except 350,240 inside the pause panel. The capture burst samples the dialog pointer's blinking color cycle. Inspect software pointer and native_cursor visibility queries; SDL events do not move the physical pointer.",
+    "profile": "Fresh isolated profile. Capture at 5s should show main menu, 20s gameplay, 26/28s pause, 34/38s resumed gameplay."
+  },
+  "act1-headquarters": {
+    "seconds": 45,
+    "capture_at": "5,7,9,11,15,25,40",
+    "keys": "3:Escape,6:Return,7:Down,8:Return,10:Return"
+  },
+  "continue": {
+    "seconds": 45,
+    "capture_at": "5,7,12,20,40",
+    "keys": "3:Escape,6:Return,8:Return",
+    "purpose": "PLAY > CONTINUE loads the newest save by filesystem timestamp; supply --user-dir from the earlier save run to test relaunch persistence."
+  },
+  "chapter-menu": {
+    "seconds": 20,
+    "capture_at": "5,7,9,12,18",
+    "keys": "3:Escape,6:Return,7:Down,8:Return",
+    "purpose": "Close while the ordinary Volume picker is open; expect clean cancellation and process exit."
+  },
+  "act1-forest": {
+    "seconds": 45,
+    "capture_at": "7,9,10.5,11.8,14,20,30,40",
+    "keys": "3:Escape,6:Return,7:Down,8:Left Ctrl,8:Left Shift,8:Return,10:Return,11:Down,11.3:Down,12:Return",
+    "mission": "forest.msn",
+    "purpose": "Use retained Ctrl+Shift+Start chapter selection without changing completion codes. Observe the representative scene; this does not play the mission to completion.",
+    "profile": "Use a fresh isolated test profile. Timings assume the menu is ready by 6 seconds; inspect captures to confirm each selection."
+  },
+  "act2-town": {
+    "seconds": 45,
+    "capture_at": "7,9,10.5,11.8,14,20,30,40",
+    "keys": "3:Escape,6:Return,7:Down,8:Left Ctrl,8:Left Shift,8:Return,9:Down,10:Return,11:Down,12:Return",
+    "mission": "town.msn",
+    "purpose": "Use retained Ctrl+Shift+Start chapter selection without changing completion codes. Observe the representative scene; this does not play the mission to completion.",
+    "profile": "Use a fresh isolated test profile. Timings assume the menu is ready by 6 seconds; inspect captures to confirm each selection."
+  },
+  "act3-chicago": {
+    "seconds": 45,
+    "capture_at": "7,9,10.5,11.8,14,20,30,40",
+    "keys": "3:Escape,6:Return,7:Down,8:Left Ctrl,8:Left Shift,8:Return,9:Down,9.3:Down,10:Return,11:Down,12:Return",
+    "mission": "chicago1.msn",
+    "purpose": "Use retained Ctrl+Shift+Start chapter selection without changing completion codes. Observe the representative scene; this does not play the mission to completion.",
+    "profile": "Use a fresh isolated test profile. Timings assume the menu is ready by 6 seconds; inspect captures to confirm each selection."
+  },
+  "act4-mansion": {
+    "seconds": 45,
+    "capture_at": "7,9,10.5,11.8,14,20,30,40",
+    "keys": "3:Escape,6:Return,7:Down,8:Left Ctrl,8:Left Shift,8:Return,9:Down,9.3:Down,9.6:Down,10:Return,11:Down,11.3:Down,12:Return",
+    "mission": "mansion.msn",
+    "purpose": "Use retained Ctrl+Shift+Start chapter selection without changing completion codes. Observe the representative scene; this does not play the mission to completion.",
+    "profile": "Use a fresh isolated test profile. Timings assume the menu is ready by 6 seconds; inspect captures to confirm each selection."
+  },
+  "act3-manual-save-load": {
+    "seconds": 55,
+    "capture_at": "10.5,11.8,17,20.5,23,25.5,29,38,50",
+    "keys": "3:Escape,6:Return,7:Down,8:Left Ctrl,8:Left Shift,8:Return,9:Down,9.3:Down,10:Return,11:Down,12:Return,20:F2,22:Return,25:F3,27:Return",
+    "mission": "chicago1.msn",
+    "purpose": "F2 opens manual save slots; Return chooses NEW SAVE (SLOT01.NOC on a fresh profile). F3 opens load slots at the current save; Return reloads it. Compare post-load scene and the saved world name.",
+    "profile": "Fresh isolated profile. Chicago starts in its main loop without an introductory cinematic, so saving is available."
+  },
+  "act3-quicksave-load": {
+    "seconds": 50,
+    "capture_at": "10.5,11.8,17,22,25.5,29,40",
+    "keys": "3:Escape,6:Return,7:Down,8:Left Ctrl,8:Left Shift,8:Return,9:Down,9.3:Down,10:Return,11:Down,12:Return,20:F6,25:F9,27:Y",
+    "mission": "chicago1.msn",
+    "purpose": "F6 writes quicksavedgame.noc; F9 opens the restore confirmation and Y confirms. Inspect scene after reload and preserve profile for Continue relaunch.",
+    "profile": "Fresh isolated profile. Does not change campaign completion codes."
+  },
+  "act1-skip-save": {
+    "seconds": 55,
+    "capture_at": "15,20.5,21.5,24,29,31.5,37,50",
+    "keys": "3:Escape,6:Return,7:Down,8:Return,10:Return,20:Escape,21:End,22:Return,30:F2,32:Return",
+    "mission": "hq-act1.msn",
+    "purpose": "Escape opens pause during the HQ intro; End chooses its final Skip cinematic entry, then Return. F2 and Return create a manual slot after the skip. Only use when captures show the intro is still letterboxed at 20 seconds.",
+    "profile": "Fresh isolated profile. If the intro has already finished, End selects Quit instead; inspect and adjust timings before trusting this sequence."
+  },
+  "load-from-menu": {
+    "seconds": 40,
+    "capture_at": "5,7,9,11,15,25,35",
+    "keys": "3:Escape,6:Return,7:Down,7.5:Down,8:Return,10:Return",
+    "purpose": "PLAY > LOAD > initial slot. Use --user-dir from a prior successful save scenario. Inspect slot list before Return to establish which save was loaded."
+  }
+}

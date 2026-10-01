@@ -1,0 +1,327 @@
+#pragma once
+
+// Dependencies
+#include "system/basetypes.h"
+#include "system/stdint.h"
+#include "system/stdio.h"
+#include "system/windef.h"
+#include "system/winnt.h"
+#include "system/winsock.h"
+#include "types/classes/CActorPropertyList.h"
+#include "types/classes/CBoundingBox3D.h"
+#include "types/classes/CCryptVessel.h"
+#include "types/classes/CDemonActor.h"
+#include "types/classes/CDemonActorType.h"
+#include "types/classes/CDemonGlobe.h"
+#include "types/classes/CLocation.h"
+#include "types/classes/CMatrix3x4f.h"
+#include "types/classes/CTVBat.h"
+#include "types/classes/CTerrain.h"
+#include "types/classes/CTire.h"
+#include "types/classes/CTrigger.h"
+#include "types/classes/CTurret.h"
+#include "types/classes/CVampireBoss.h"
+#include "types/classes/CVector3f.h"
+#include "types/classes/CVehicle.h"
+#include "types/classes/CWater.h"
+#include "types/classes/CWaterActor.h"
+#include "types/classes/CWayPoint.h"
+#include "types/classes/CWeapon.h"
+#include "types/classes/CWeather.h"
+#include "types/classes/CWerewolf.h"
+#include "types/enums/ECollisionType.h"
+#include "types/enums/EDeathState.h"
+#include "types/enums/EGroundType.h"
+#include "types/enums/EWeatherType.h"
+#include "types/structs/SCollisionInfo.h"
+#include "types/structs/SDamageInfo.h"
+#include "types/structs/SInteractionInfo.h"
+#include "types/structs/SLaserInfo.h"
+#include "types/structs/SNetworkAddr.h"
+#include "types/structs/SPlayerInput.h"
+#include "types/structs/SWaterVertex.h"
+#include "types/unions/UOrientationVector.h"
+
+// =============================================================================
+// FUNCTION PROTOTYPES - Range 0x5E0000
+// =============================================================================
+
+int __cdecl core_trigger_cpp_CTrigger_renderTransparent_FUN_005e00d0(CTrigger *this_ptr);
+CBoundingBox3D * __cdecl core_trigger_cpp_CTrigger_getBoundingBox_FUN_005e0630(CTrigger *this_ptr,CBoundingBox3D *out_box);
+void __cdecl core_trigger_cpp_CTrigger_archive_FUN_005e0690(CTrigger *this_ptr);
+ECollisionType __cdecl core_trigger_cpp_CTrigger_getCollisionType_FUN_005e0930(CTrigger *this_ptr,SCollisionInfo *collision_info);
+float __cdecl core_trigger_cpp_CTrigger_evaluateTriggerCondition_FUN_005e0980(CTrigger *this_ptr,CDemonActor *querying_actor,CVector3f *query_position);
+int __cdecl core_trigger_cpp_CTrigger_processActionButton_FUN_005e0a20(CTrigger *this_ptr);
+void __cdecl core_trigger_cpp_CTrigger_onLaserHit_FUN_005e0a50(CTrigger *this_ptr,SLaserInfo *laser_info);
+void __cdecl core_trigger_cpp_CTrigger_onProjectileHit_FUN_005e0aa0(CTrigger *this_ptr);
+int __cdecl core_trigger_cpp_CTrigger_acceptsDamageFrom_FUN_005e0ac0(CTrigger *this_ptr,CDemonActor *actor);
+void __cdecl core_trigger_cpp_CTrigger_applyDamage_FUN_005e0b00(CTrigger *this_ptr,float hit_points);
+void __cdecl core_trigger_cpp_CTrigger_calculateTestRadius_FUN_005e0ba0(CTrigger *this_ptr);
+int __cdecl core_trigger_cpp_CTrigger_getTargetPoints_FUN_005e0c30(CTrigger *this_ptr,CVector3f *out_points_array);
+int __cdecl core_trigger_cpp_CTrigger_containsActor_FUN_005e0cd0(CTrigger *this_ptr,CDemonActor *actor);
+void __cdecl core_trigger_cpp_CTrigger_getPropertyList_FUN_005e0f70(CTrigger *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_trigger_cpp_CTrigger_processInEditor_FUN_005e1180(CTrigger *this_ptr);
+void __cdecl core_trigger_cpp_CTrigger_showEditorHelp_FUN_005e1350(CTrigger *this_ptr,int *y_pos);
+CTrigger * __cdecl core_trigger_cpp_CTrigger_dtor_FUN_005e1660(CTrigger *this_ptr,uint flags);
+void __cdecl support_trisock_cpp_staticInit_FUN_005e16b0(void);
+uint * __cdecl support_trisock_cpp_copyIPAddress_FUN_005e16f0(uint *dest_ip,uint *src_ip);
+uint * __cdecl support_trisock_cpp_parseIPAddress_FUN_005e1700(uint *result_ptr,char *dotted_decimal_string);
+uint8_t * __cdecl support_trisock_cpp_buildIPAddressOrDie_FUN_005e1750(uchar *dest_ip,int octet1,int octet2,int octet3,int octet4);
+void __cdecl support_trisock_cpp_formatIPAddress_FUN_005e17c0(char *output_buffer,uchar *ip_bytes);
+int __cdecl support_trisock_cpp_parseIPComponents_FUN_005e1800(uint *result_ptr,char *dotted_decimal_string);
+int __cdecl support_trisock_cpp_buildIPAddress_FUN_005e1870(uint8_t *dest_ip,int octet1,int octet2,int octet3,int octet4);
+void __cdecl support_trisock_cpp_extractIPOctets_FUN_005e18e0(uchar *ip_bytes,uint *octet1_ptr,uint *octet2_ptr,uint *octet3_ptr,uint *octet4_ptr);
+uint __cdecl support_trisock_cpp_getIPAddress_FUN_005e1930(SNetworkAddr *net_addr);
+void __cdecl support_trisock_cpp_createNetworkAddr_FUN_005e1940(SNetworkAddr *dest_addr,uint32_t *ip_address_ptr,uint16_t port);
+SOCKADDR_IN * __cdecl support_trisock_cpp_convertSockAddr_FUN_005e1960(SNetworkAddr *dest_addr,SOCKADDR *src_addr);
+SOCKADDR_IN * __stack_esi support_trisock_cpp_buildSockaddrIn_FUN_005e19d0(SNetworkAddr *net_addr,SOCKADDR_IN *dest_buffer);
+void __cdecl support_trisock_cpp_formatSocketAddress_FUN_005e1a30(char *output_buffer,SNetworkAddr *network_addr);
+int __cdecl support_trisock_cpp_shouldNeverBeCalled1_FUN_005e1a80(int unknown1,int unknown2);
+int __cdecl support_trisock_cpp_shouldNeverBeCalled2_FUN_005e1ab0(int unknown1,int unknown2);
+_SOCKET * __cdecl support_trisock_cpp_invalidateSocket_FUN_005e1ae0(_SOCKET *socket_handle);
+_SOCKET * __cdecl support_trisock_cpp_bindSocketWrapper_FUN_005e1af0(_SOCKET *socket_handle,int flags);
+int __cdecl support_trisock_cpp_createSocket_FUN_005e1b10(_SOCKET *socket_handle);
+int __cdecl support_trisock_cpp_createUDPSocket_FUN_005e1b40(_SOCKET *socket_handle);
+int __cdecl support_trisock_cpp_isSocketValid_FUN_005e1b70(_SOCKET *socket_handle);
+int __cdecl support_trisock_cpp_bindSocket_FUN_005e1b80(_SOCKET *socket_handle,uint16_t port);
+int __cdecl support_trisock_cpp_connectSocket_FUN_005e1bd0(_SOCKET *socket_handle,SNetworkAddr *dest_addr);
+int __cdecl support_trisock_cpp_receiveSocketData_FUN_005e1c20(_SOCKET *socket_handle,char *buffer,int length,SNetworkAddr *source_addr);
+int __cdecl support_trisock_cpp_performSocketOperation_FUN_005e1ca0(_SOCKET *socket_handle,char *buffer,int length,SNetworkAddr *dest_addr);
+int __cdecl support_trisock_cpp_bindAndInvalidateSocket_FUN_005e1d20(_SOCKET *socket_handle);
+int __cdecl support_trisock_cpp_listenSocket_FUN_005e1d60(_SOCKET *socket_handle);
+int __cdecl support_trisock_cpp_acceptConnection_FUN_005e1d80(_SOCKET *listen_socket,SNetworkAddr *client_addr,_SOCKET *new_socket);
+int __cdecl support_trisock_cpp_getSocketName_FUN_005e1df0(_SOCKET *socket_handle,SNetworkAddr *out_address);
+int __cdecl support_trisock_cpp_setSocketBlocking_FUN_005e1e50(_SOCKET *socket_handle,int blocking_mode);
+int __cdecl support_trisock_cpp_setSocketBroadcast_FUN_005e1e90(_SOCKET *socket_handle,int broadcast_flag);
+int __cdecl support_trisock_cpp_startupWinsock_FUN_005e1ec0(void);
+int __cdecl support_trisock_cpp_cleanupWinsock_FUN_005e1ee0(void);
+void __cdecl core_terrain_cpp_CTerrain_init_FUN_005e1ef0(CTerrain *this_ptr);
+void __cdecl core_terrain_cpp_CTerrain_free_FUN_005e1f30(CTerrain *this_ptr);
+void __cdecl core_terrain_cpp_CTerrain_render_FUN_005e1f50(CTerrain *this_ptr,int render_pass);
+void __cdecl core_terrain_cpp_CTerrain_process_FUN_005e2050(CTerrain *this_ptr);
+void __cdecl core_turret_cpp_staticInit_FUN_005e2080(void);
+CTurret * __cdecl core_turret_cpp_factoryFuncTurret_FUN_005e20b0(void);
+CDemonActorType * __cdecl core_turret_cpp_CTurret_getActorType_FUN_005e20e0(CTurret *this_ptr);
+CTurret * __cdecl core_turret_cpp_CTurret_ctor_FUN_005e20f0(CTurret *this_ptr);
+void __cdecl core_turret_cpp_CTurret_setup_FUN_005e2240(CTurret *this_ptr);
+int __cdecl core_turret_cpp_CTurret_renderOpaque_FUN_005e2320(CTurret *this_ptr);
+void __cdecl core_turret_cpp_CTurret_process_FUN_005e2430(CTurret *this_ptr,float delta_time);
+CBoundingBox3D * __cdecl core_turret_cpp_CTurret_getBoundingBox_FUN_005e2910(CTurret *this_ptr,CBoundingBox3D *out_box);
+float __cdecl core_turret_cpp_CTurret_getCurFrame_FUN_005e2b30(CTurret *this_ptr,int model_index);
+void __cdecl core_turret_cpp_CTurret_archive_FUN_005e2c40(CTurret *this_ptr);
+void __cdecl core_turret_cpp_CTurret_updateTargeting_FUN_005e2d50(CTurret *this_ptr,float delta_time);
+int __cdecl core_turret_cpp_CTurret_aimAtTarget_FUN_005e3280(CTurret *this_ptr,CVector3f *target_pos,float delta_time);
+void __cdecl core_turret_cpp_CTurret_getInteractionInfo_FUN_005e3440(CTurret *this_ptr,SInteractionInfo *interaction_info);
+int __cdecl core_turret_cpp_CTurret_startInteraction_FUN_005e34b0(CTurret *this_ptr,CDemonActor *user);
+int __cdecl core_turret_cpp_CTurret_updateInteraction_FUN_005e34d0(CTurret *this_ptr,UOrientationVector *user_orientation,SPlayerInput *player_control);
+void __cdecl core_turret_cpp_CTurret_stopInteraction_FUN_005e3540(CTurret *this_ptr,CDemonActor *user);
+void __cdecl core_turret_cpp_CTurret_updatePatrol_FUN_005e3560(CTurret *this_ptr,float delta_time);
+float __cdecl core_turret_cpp_CTurret_getDamage_FUN_005e36f0(CTurret *this_ptr);
+CVector3f * __cdecl core_turret_cpp_CTurret_getMuzzlePoint_FUN_005e3720(CTurret *this_ptr,CVector3f *out_point);
+int __cdecl core_turret_cpp_CTurret_fire_FUN_005e3750(CTurret *this_ptr);
+int __cdecl core_turret_cpp_CTurret_canPickup_FUN_005e3c70(CTurret *this_ptr,CDemonActor *picker);
+void __cdecl core_turret_cpp_CTurret_getPropertyList_FUN_005e3ca0(CTurret *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_turret_cpp_CTurret_processInEditor_FUN_005e3dd0(CTurret *this_ptr);
+CTurret * __cdecl core_turret_cpp_CTurret_dtor_FUN_005e3e00(CTurret *this_ptr,uint flags);
+void __cdecl core_tvbat_cpp_staticInit_FUN_005e3e50(void);
+CTVBat * __cdecl core_tvbat_cpp_factoryFuncTVBat_FUN_005e3e80(void);
+CDemonActorType * __cdecl core_tvbat_cpp_CTVBat_getActorType_FUN_005e3eb0(CTVBat *this_ptr);
+float __cdecl core_tvbat_cpp_jitterValue_FUN_005e3ec0(float value);
+CTVBat * __cdecl core_tvbat_cpp_CTVBat_ctor_FUN_005e3ef0(CTVBat *this_ptr);
+void __cdecl core_tvbat_cpp_CTVBat_setup_FUN_005e4050(CTVBat *this_ptr);
+void __cdecl core_tvbat_cpp_CTVBat_archive_FUN_005e40c0(CTVBat *this_ptr);
+void __cdecl core_tvbat_cpp_CTVBat_process_FUN_005e4210(CTVBat *this_ptr,float delta_time);
+void __cdecl core_tvbat_cpp_CTVBat_orderAttack_FUN_005e4d70(CTVBat *this_ptr);
+int __cdecl core_tvbat_cpp_CTVBat_renderOpaque_FUN_005e4d80(CTVBat *this_ptr);
+CBoundingBox3D * __cdecl core_tvbat_cpp_CTVBat_getBoundingBox_FUN_005e5050(CTVBat *this_ptr,CBoundingBox3D *out_box);
+ECollisionType __cdecl core_tvbat_cpp_CTVBat_getCollisionType_FUN_005e50d0(CTVBat *this_ptr,SCollisionInfo *collision_info);
+int __cdecl core_tvbat_cpp_CTVBat_getTargetPoints_FUN_005e50f0(CTVBat *this_ptr,CVector3f *out_points_array);
+EDeathState __cdecl core_tvbat_cpp_CTVBat_getDeathState_FUN_005e5100(CTVBat *this_ptr);
+void __cdecl core_tvbat_cpp_CTVBat_processDamage_FUN_005e5130(CTVBat *this_ptr,SDamageInfo *damage_info);
+void __cdecl core_tvbat_cpp_CTVBat_getPropertyList_FUN_005e51a0(CTVBat *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_tvbat_cpp_CTVBat_processInEditor_FUN_005e5260(CTVBat *this_ptr);
+void __cdecl core_tvbat_cpp_CTVBat_showEditorHelp_FUN_005e5400(CTVBat *this_ptr,int *y_pos);
+void __cdecl core_tvbat_cpp_CTVBat_addFilesToExtract_FUN_005e5440(CTVBat *this_ptr,_FILE *file_handle);
+CTVBat * __cdecl core_tvbat_cpp_CTVBat_dtor_FUN_005e5460(CTVBat *this_ptr,uint flags);
+void __cdecl core_vampboss_cpp_staticInit_FUN_005e5520(void);
+CVampireBoss * __cdecl core_vampboss_cpp_factoryFuncVampireBoss_FUN_005e5550(void);
+CDemonActorType * __cdecl core_vampboss_cpp_CVampireBoss_getActorType_FUN_005e5580(CVampireBoss *this_ptr);
+CVampireBoss * __cdecl core_vampboss_cpp_CVampireBoss_ctor_FUN_005e5590(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_setup_FUN_005e56c0(CVampireBoss *this_ptr);
+float __cdecl core_vampboss_cpp_clampAngle_FUN_005e58d0(float angle,float max_angle);
+void __cdecl core_vampboss_cpp_CVampireBoss_process_FUN_005e5970(CVampireBoss *this_ptr,float delta_time);
+void __stack2_esi core_vampboss_cpp_CVampireBoss_getCarryObjToBodyXForm_FUN_005e6b80(CVampireBoss *this_ptr,int hand_index,CMatrix3x4f *out_matrix);
+void __cdecl core_vampboss_cpp_CVampireBoss_advanceAnimation_FUN_005e6ca0(CVampireBoss *this_ptr,float delta_time);
+int __cdecl core_vampboss_cpp_CVampireBoss_renderOpaque_FUN_005e6da0(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_archive_FUN_005e6f50(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_processDamage_FUN_005e7030(CVampireBoss *this_ptr,SDamageInfo *damage_info);
+EDeathState __cdecl core_vampboss_cpp_CVampireBoss_getDeathState_FUN_005e7270(CVampireBoss *this_ptr);
+int __cdecl core_vampboss_cpp_CVampireBoss_getTargetPoints_FUN_005e7280(CVampireBoss *this_ptr,CVector3f *out_points_array);
+void __cdecl core_vampboss_cpp_CVampireBoss_summonBats_FUN_005e7320(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_summonStalagmites_FUN_005e7390(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_summonFireEmitters_FUN_005e7410(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_transformToBat_FUN_005e7480(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_transformToHuman_FUN_005e74c0(CVampireBoss *this_ptr);
+void __cdecl core_vampboss_cpp_CVampireBoss_chooseDestWayPoint_FUN_005e7510(CVampireBoss *this_ptr);
+ECollisionType __cdecl core_vampboss_cpp_CVampireBoss_getCollisionType_FUN_005e75f0(CVampireBoss *this_ptr,SCollisionInfo *collision_info);
+void __cdecl core_vampboss_cpp_CVampireBoss_getPropertyList_FUN_005e7650(CVampireBoss *this_ptr,CActorPropertyList *property_list);
+CVampireBoss * __cdecl core_vampboss_cpp_CVampireBoss_dtor_FUN_005e7700(CVampireBoss *this_ptr,uint flags);
+void __cdecl core_vecdir_cpp_staticInit_FUN_005e7810(void);
+CVector3f * __cdecl core_vecdir_cpp_convertDirectionVectorToEulerAngles_FUN_005e7830(CVector3f *out_euler_angles,CVector3f *in_direction_vector);
+void __cdecl core_vehicle_cpp_staticInit_FUN_005e78d0(void);
+CVehicle * __cdecl core_vehicle_cpp_factoryFuncVehicle_FUN_005e7900(void);
+CDemonActorType * __cdecl core_vehicle_cpp_CVehicle_getActorType_FUN_005e7930(CVehicle *this_ptr);
+CVehicle * __cdecl core_vehicle_cpp_CVehicle_ctor_FUN_005e7940(CVehicle *this_ptr);
+void __cdecl core_vehicle_cpp_CVehicle_setup_FUN_005e7b90(CVehicle *this_ptr);
+void __cdecl core_vehicle_cpp_CVehicle_process_FUN_005e7e80(CVehicle *this_ptr,float delta_time);
+CBoundingBox3D * __cdecl core_vehicle_cpp_CVehicle_getBoundingBox_FUN_005e86d0(CVehicle *this_ptr,CBoundingBox3D *out_box);
+void __cdecl core_vehicle_cpp_CVehicle_archive_FUN_005e8720(CVehicle *this_ptr);
+ECollisionType __cdecl core_vehicle_cpp_CVehicle_getCollisionType_FUN_005e88b0(CVehicle *this_ptr,SCollisionInfo *collision_info);
+int __cdecl core_vehicle_cpp_CVehicle_renderOpaque_FUN_005e88c0(CVehicle *this_ptr);
+int __cdecl core_vehicle_cpp_CVehicle_renderTransparent_FUN_005e8b30(CVehicle *this_ptr);
+void __cdecl core_vehicle_cpp_CVehicle_renderBackground_FUN_005e8b40(CVehicle *this_ptr,int layer_flag);
+uint __cdecl core_vehicle_cpp_CVehicle_playTrackedSound_FUN_005e8b50(CVehicle *this_ptr,char *sound_name);
+void __cdecl core_vehicle_cpp_CVehicle_getPropertyList_FUN_005e8ba0(CVehicle *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_vehicle_cpp_CVehicle_processInEditor_FUN_005e8cf0(CVehicle *this_ptr);
+void __cdecl core_vehicle_cpp_CVehicle_addFilesToExtract_FUN_005e8d00(CVehicle *this_ptr,_FILE *file_handle);
+CVehicle * __cdecl core_vehicle_cpp_CVehicle_dtor_FUN_005e8d20(CVehicle *this_ptr,uint flags);
+CTire * __cdecl core_vehicle_cpp_CTire_ctor_FUN_005e8da0(CTire *this_ptr);
+CTire * __cdecl core_vehicle_cpp_CTire_dtor_FUN_005e8dc0(CTire *this_ptr,uint flags);
+CTire * __cdecl core_vehicle_cpp_CTire_arrdtor4_FUN_005e8dd0(CTire *this_ptr,uint flags);
+void __cdecl core_vessel_cpp_staticInit_FUN_005e8df0(void);
+CCryptVessel * __cdecl core_vessel_cpp_factoryFuncCryptVessel_FUN_005e8e20(void);
+CDemonActorType * __cdecl core_vessel_cpp_CCryptVessel_getActorType_FUN_005e8e50(CCryptVessel *this_ptr);
+CCryptVessel * __cdecl core_vessel_cpp_CCryptVessel_ctor_FUN_005e8e60(CCryptVessel *this_ptr);
+void __cdecl core_vessel_cpp_CCryptVessel_setup_FUN_005e8fc0(CCryptVessel *this_ptr);
+int __cdecl core_vessel_cpp_CCryptVessel_canPickup_FUN_005e9100(CCryptVessel *this_ptr,CDemonActor *picker);
+void __cdecl core_vessel_cpp_CCryptVessel_pickup_FUN_005e9140(CCryptVessel *this_ptr,CDemonActor *carrier);
+void __cdecl core_vessel_cpp_CCryptVessel_onDropped_FUN_005e9150(CCryptVessel *this_ptr,CVector3f *drop_position);
+CDemonActor * __cdecl core_vessel_cpp_CCryptVessel_getCarrier_FUN_005e9170(CCryptVessel *this_ptr);
+int __cdecl core_vessel_cpp_isStartLocTriggered_FUN_005e9180(CCryptVessel *actor);
+void __cdecl core_vessel_cpp_CCryptVessel_process_FUN_005e91a0(CCryptVessel *this_ptr,float delta_time);
+int __cdecl core_vessel_cpp_CCryptVessel_renderOpaque_FUN_005e9750(CCryptVessel *this_ptr);
+int __cdecl core_vessel_cpp_CCryptVessel_renderTransparent_FUN_005e98b0(CCryptVessel *this_ptr);
+void __cdecl core_vessel_cpp_CCryptVessel_renderBackground_FUN_005e9a00(CCryptVessel *this_ptr,int layer_flag);
+void __cdecl core_vessel_cpp_CCryptVessel_archive_FUN_005e9a80(CCryptVessel *this_ptr);
+ECollisionType __cdecl core_vessel_cpp_CCryptVessel_getCollisionType_FUN_005e9b90(CCryptVessel *this_ptr,SCollisionInfo *collision_info);
+CBoundingBox3D * __cdecl core_vessel_cpp_CCryptVessel_getBoundingBox_FUN_005e9bb0(CCryptVessel *this_ptr,CBoundingBox3D *out_box);
+void __cdecl core_vessel_cpp_CCryptVessel_getPropertyList_FUN_005e9c00(CCryptVessel *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_vessel_cpp_CCryptVessel_addFilesToExtract_FUN_005e9d10(CCryptVessel *this_ptr,_FILE *file_handle);
+CCryptVessel * __cdecl core_vessel_cpp_CCryptVessel_dtor_FUN_005e9d30(CCryptVessel *this_ptr,uint flags);
+void __cdecl core_water_cpp_staticInit_FUN_005e9da0(void);
+float __cdecl core_water_cpp_calculateWaveHeight_FUN_005e9dc0(int x,int y);
+CWater * __cdecl core_water_cpp_CWater_ctor_FUN_005e9e10(CWater *this_ptr);
+CWater * __cdecl core_water_cpp_CWater_dtor_FUN_005e9e30(CWater *this_ptr,uint flags);
+void __cdecl core_water_cpp_CWater_captureTextures_FUN_005e9e40(CWater *this_ptr);
+void __cdecl core_water_cpp_CWater_calculateVisibleTiles_FUN_005e9e70(CWater *this_ptr);
+void __cdecl core_water_cpp_CWater_process_FUN_005e9ed0(CWater *this_ptr);
+void __cdecl core_water_cpp_CWater_render_FUN_005ea320(CWater *this_ptr,int render_mode);
+void __cdecl core_wateract_cpp_staticInit_FUN_005ea810(void);
+CWaterActor * __cdecl core_wateract_cpp_factoryFuncWaterActor_FUN_005ea860(void);
+CDemonActorType * __cdecl core_wateract_cpp_CWaterActor_getActorType_FUN_005ea890(CWaterActor *this_ptr);
+CWaterActor * __cdecl core_wateract_cpp_CWaterActor_ctor_FUN_005ea8a0(CWaterActor *this_ptr);
+void __cdecl core_wateract_cpp_CWaterActor_setup_FUN_005ea9f0(CWaterActor *this_ptr);
+void __cdecl core_wateract_cpp_CWaterActor_updateWorldPositions_FUN_005eafa0(CWaterActor *this_ptr);
+void __cdecl core_wateract_cpp_CWaterActor_updateLocalPositions_FUN_005eb040(CWaterActor *this_ptr);
+void __cdecl core_wateract_cpp_CWaterActor_process_FUN_005eb100(CWaterActor *this_ptr,float delta_time);
+int __cdecl core_wateract_cpp_CWaterActor_renderTransparent_FUN_005eb280(CWaterActor *this_ptr);
+CBoundingBox3D * __cdecl core_wateract_cpp_CWaterActor_getBoundingBox_FUN_005eb4b0(CWaterActor *this_ptr,CBoundingBox3D *out_box);
+void __cdecl core_wateract_cpp_CWaterActor_archive_FUN_005eb510(CWaterActor *this_ptr);
+ECollisionType __cdecl core_wateract_cpp_CWaterActor_getCollisionType_FUN_005eb710(CWaterActor *this_ptr,SCollisionInfo *collision_info);
+EGroundType __cdecl core_wateract_cpp_CWaterActor_getGroundType_FUN_005eb730(CWaterActor *this_ptr);
+float __cdecl core_wateract_cpp_CWaterActor_customRayIntersect_FUN_005eb740(CWaterActor *this_ptr,CVector3f *ray_origin,CVector3f *ray_direction,CVector3f *out_normal);
+void __cdecl core_wateract_cpp_CWaterActor_onLaserHit_FUN_005eb910(CWaterActor *this_ptr,SLaserInfo *laser_info);
+void __cdecl core_wateract_cpp_CWaterActor_getPropertyList_FUN_005eb940(CWaterActor *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_wateract_cpp_CWaterActor_processInEditor_FUN_005ebab0(CWaterActor *this_ptr);
+void __cdecl core_wateract_cpp_CWaterActor_showEditorHelp_FUN_005ebc10(CWaterActor *this_ptr,int *y_pos);
+void __cdecl core_wateract_cpp_CWaterActor_addFilesToExtract_FUN_005ebc50(CWaterActor *this_ptr,_FILE *file_handle);
+CWaterActor * __cdecl core_wateract_cpp_CWaterActor_dtor_FUN_005ebc60(CWaterActor *this_ptr,uint flags);
+SWaterVertex * __cdecl core_wateract_cpp_SWaterVertex_ctor_FUN_005ebcd0(SWaterVertex *this_ptr);
+SWaterVertex * __cdecl core_wateract_cpp_SWaterVertex_dtor_FUN_005ebce0(SWaterVertex *this_ptr,uint flags);
+SWaterVertex * __cdecl core_wateract_cpp_SWaterVertex_arrdtor1000_FUN_005ebcf0(SWaterVertex *objs,uint flags);
+void __cdecl core_waypoint_cpp_staticInit_FUN_005ebd10(void);
+int __cdecl core_waypoint_cpp_CWayPoint_isReachable_FUN_005ebd40(CWayPoint *this_ptr,CLocation *from_location,int use_tight_bounds);
+CWayPoint * __cdecl core_waypoint_cpp_factoryFuncWayPoint_FUN_005ebe30(void);
+CDemonActorType * __cdecl core_waypoint_cpp_CWayPoint_getActorType_FUN_005ebe60(CWayPoint *this_ptr);
+CWayPoint * __cdecl core_waypoint_cpp_CWayPoint_ctor_FUN_005ebe70(CWayPoint *this_ptr);
+void __cdecl core_waypoint_cpp_CWayPoint_setup_FUN_005ebeb0(CWayPoint *this_ptr);
+int __cdecl core_waypoint_cpp_CWayPoint_renderOpaque_FUN_005ebf70(CWayPoint *this_ptr);
+void __cdecl core_waypoint_cpp_CWayPoint_archive_FUN_005ec280(CWayPoint *this_ptr);
+CWayPoint * __cdecl core_waypoint_cpp_CWayPoint_findNearestReachable_FUN_005ec320(CWayPoint *this_ptr,CWayPoint *start_waypoint);
+void __cdecl core_waypoint_cpp_CWayPoint_getPropertyList_FUN_005ec4d0(CWayPoint *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_waypoint_cpp_CWayPoint_rebuildConnectivity_FUN_005ec4f0(CWayPoint *this_ptr);
+void __cdecl core_waypoint_cpp_CWayPoint_processInEditor_FUN_005ec5e0(CWayPoint *this_ptr);
+void __cdecl core_waypoint_cpp_CWayPoint_onActorDeleted_FUN_005ec610(CWayPoint *this_ptr,CDemonActor *deleted_actor);
+void __cdecl core_waypoint_cpp_CWayPoint_removeAllAdjTo_FUN_005ec640(CWayPoint *this_ptr,CWayPoint *target);
+void __cdecl core_waypoint_cpp_CWayPoint_showEditorHelp_FUN_005ec690(CWayPoint *this_ptr,int *y_pos);
+void __cdecl core_waypoint_cpp_CWayPoint_addAdj_FUN_005ec700(CWayPoint *this_ptr,CWayPoint *target);
+void __cdecl core_waypoint_cpp_CWayPoint_removeAdj_FUN_005ec7b0(CWayPoint *this_ptr,int index);
+void __cdecl core_waypoint_cpp_CWayPoint_cleanupAdjacency_FUN_005ec830(CWayPoint *this_ptr);
+CWayPoint * __cdecl core_waypoint_cpp_CWayPoint_dtor_FUN_005ec8d0(CWayPoint *this_ptr,uint flags);
+void __cdecl wincore_wddvmem_cpp_cleanupDirectDrawSurfaces_FUN_005ec920(void);
+int __cdecl wincore_wddvmem_cpp_reinitializeDirectDraw_FUN_005ec980(void);
+int __cdecl wincore_wddvmem_cpp_shutdownDirectDraw_FUN_005eca30(void);
+void __cdecl wincore_wddvmem_cpp_allocateRenderBuffers_FUN_005ecac0(void);
+void __cdecl wincore_wddvmem_cpp_freeRenderBuffers_FUN_005ecba0(void);
+int __cdecl wincore_wddvmem_cpp_initializeGraphicsSystem_FUN_005ecc10(int width,int height);
+void __cdecl wincore_wddvmem_cpp_cleanupGraphicsSystem_FUN_005ecd90(void);
+void __cdecl wincore_wddvmem_cpp_initializeScanlinePointers_FUN_005ece60(void);
+int __cdecl wincore_wddvmem_cpp_setScreenResolution_FUN_005ecef0(int width,int height,int bits_per_pixel);
+void __cdecl wincore_wddvmem_cpp_resetGraphicsSystem_FUN_005ed2a0(void);
+void __cdecl wincore_wddvmem_cpp_reinitializeGraphicsSystem_FUN_005ed4b0(void);
+void __cdecl wincore_wddvmem_cpp_openScreenDevice_FUN_005ed580(void);
+void __cdecl wincore_wddvmem_cpp_closeScreenDevice_FUN_005ed630(void);
+int __cdecl wincore_wddvmem_cpp_findMostSignificantBit_FUN_005ed710(uint value);
+void __cdecl wincore_wddvmem_cpp_analyzePixelFormat_FUN_005ed730(void);
+void __cdecl wincore_wddvmem_cpp_setupColorPalette_FUN_005ed8f0(void);
+void __cdecl wincore_wddvmem_cpp_swapBuffers_FUN_005eda20(void);
+void __cdecl wincore_wddvmem_cpp_restoreVideoAndMinimizeWindow_FUN_005edc50(void);
+void __cdecl wincore_wddvmem_cpp_videoRestore_FUN_005edc80(void);
+void __cdecl wincore_wddvmem_cpp_stubFunction_FUN_005edd80(void);
+BOOL __cdecl wincore_wddvmem_cpp_freeLibrary_FUN_005ede00(HMODULE hLibModule);
+HMODULE __cdecl wincore_wddvmem_cpp_loadLibrary_FUN_005ede10(LPCSTR lpLibFileName);
+FARPROC __cdecl wincore_wddvmem_cpp_getProcAddress_FUN_005ede20(HMODULE hModule,LPCSTR lpProcName);
+void __cdecl core_weapon_cpp_staticInit_FUN_005ede40(void);
+CWeapon * __cdecl core_weapon_cpp_CWeapon_ctor_FUN_005ede70(CWeapon *this_ptr);
+CWeapon * __cdecl core_weapon_cpp_CWeapon_dtor_FUN_005edf80(CWeapon *this_ptr,uint flags);
+void __cdecl core_weapon_cpp_CWeapon_setup_FUN_005edff0(CWeapon *this_ptr);
+int __cdecl core_weapon_cpp_CWeapon_renderOpaque_FUN_005ee030(CWeapon *this_ptr);
+CBoundingBox3D * __cdecl core_weapon_cpp_CWeapon_getBoundingBox_FUN_005ee0c0(CWeapon *this_ptr,CBoundingBox3D *out_box);
+void __cdecl core_weapon_cpp_CWeapon_process_FUN_005ee110(CWeapon *this_ptr,float delta_time);
+void __cdecl core_weapon_cpp_CWeapon_archive_FUN_005ee250(CWeapon *this_ptr);
+ECollisionType __cdecl core_weapon_cpp_CWeapon_getCollisionType_FUN_005ee330(CWeapon *this_ptr,SCollisionInfo *collision_info);
+int __cdecl core_weapon_cpp_CWeapon_canPickup_FUN_005ee340(CWeapon *this_ptr,CDemonActor *picker);
+void __cdecl core_weapon_cpp_CWeapon_pickup_FUN_005ee3e0(CWeapon *this_ptr,CDemonActor *carrier);
+void __cdecl core_weapon_cpp_CWeapon_onDropped_FUN_005ee3f0(CWeapon *this_ptr,CVector3f *drop_position);
+CDemonActor * __cdecl core_weapon_cpp_CWeapon_getCarrier_FUN_005ee490(CWeapon *this_ptr);
+void __cdecl core_weapon_cpp_CWeapon_updateLighting_FUN_005ee4a0(CWeapon *this_ptr);
+void __cdecl core_weapon_cpp_CWeapon_setWeaponState_FUN_005ee640(CWeapon *this_ptr,int weapon_state);
+void __cdecl core_weapon_cpp_CWeapon_onPickup_FUN_005ee650(CWeapon *this_ptr,CDemonActor *owner);
+CVector3f * __cdecl core_weapon_cpp_CWeapon_getMuzzlePoint_FUN_005ee670(CWeapon *this_ptr,CVector3f *out_point);
+int __cdecl core_weapon_cpp_CWeapon_fire_FUN_005ee6e0(CWeapon *this_ptr);
+int __cdecl core_weapon_cpp_CWeapon_isReadyToFire_FUN_005ee710(CWeapon *this_ptr);
+float __cdecl core_weapon_cpp_CWeapon_getDamage_FUN_005ee730(CWeapon *this_ptr);
+void __cdecl core_weapon_cpp_CWeapon_setupPhysicsBox_FUN_005ee740(CWeapon *this_ptr);
+void __cdecl core_weapon_cpp_CWeapon_renderAimBeam_FUN_005ee830(CWeapon *this_ptr);
+void __cdecl core_weapon_cpp_CWeapon_onFired_FUN_005ee860(CWeapon *this_ptr);
+void __cdecl core_weapon_cpp_CWeapon_getPropertyList_FUN_005ee9f0(CWeapon *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_weapon_cpp_CWeapon_addFilesToExtract_FUN_005eea60(CWeapon *this_ptr,_FILE *file_handle);
+CDemonGlobe * __cdecl core_weapon_cpp_CDemonGlobe_ctor_FUN_005eea80(CDemonGlobe *this_ptr);
+CDemonGlobe * __cdecl core_weapon_cpp_CDemonGlobe_dtor_FUN_005eea90(CDemonGlobe *this_ptr,uint flags);
+void __cdecl core_weather_cpp_staticInit_FUN_005eeaa0(void);
+CWeather * __cdecl core_weather_cpp_CWeather_ctor_FUN_005eead0(CWeather *this_ptr);
+void __cdecl core_weather_cpp_CWeather_update_FUN_005eeaf0(CWeather *this_ptr);
+void __cdecl core_weather_cpp_CWeather_createLightningStrike_FUN_005eeeb0(CWeather *this_ptr,float flash_timer,int play_sound);
+void __cdecl core_weather_cpp_CWeather_createThunder_FUN_005ef140(CWeather *this_ptr);
+void __cdecl core_weather_cpp_CWeather_renderParticles_FUN_005ef190(CWeather *this_ptr);
+void __cdecl core_weather_cpp_CWeather_setWeatherType_FUN_005ef8c0(CWeather *this_ptr,EWeatherType type);
+void __cdecl core_weather_cpp_CWeather_setOriginAndRotation_FUN_005ef940(CWeather *this_ptr,CVector3f *direction,CVector3f *rotation);
+CWeather * __cdecl core_weather_cpp_CWeather_dtor_FUN_005efb40(CWeather *this_ptr,uint flags);
+CVector3f * __cdecl core_weather_cpp_CVector3f_arrdtor200_FUN_005efb50(CVector3f *this_ptr,uint flags);
+void __cdecl core_werewolf_cpp_staticInit_FUN_005efb70(void);
+CWerewolf * __cdecl core_werewolf_cpp_factoryFuncWerewolf_FUN_005efbd0(void);
+CDemonActorType * __cdecl core_werewolf_cpp_CWerewolf_getActorType_FUN_005efc00(CWerewolf *this_ptr);
+CWerewolf * __cdecl core_werewolf_cpp_CWerewolf_ctor_FUN_005efc10(CWerewolf *this_ptr);
+void __cdecl core_werewolf_cpp_CWerewolf_setup_FUN_005efcc0(CWerewolf *this_ptr);
+void __cdecl core_werewolf_cpp_CWerewolf_process_FUN_005efde0(CWerewolf *this_ptr,float delta_time);
+

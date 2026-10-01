@@ -1,0 +1,14 @@
+// Name: core_fire.cpp_CExplosion_ctor_FUN_004c38c0
+// Address: 004c38c0
+// Address Range: [[004c38c0, 004c38cb]]
+// Convention: __cdecl
+// Signature: CExplosion * __cdecl core_fire_cpp_CExplosion_ctor_FUN_004c38c0(CExplosion *this_ptr)
+
+#include "nocturne.h"
+
+CExplosion * __cdecl core_fire_cpp_CExplosion_ctor_FUN_004c38c0(CExplosion *this_ptr)
+
+{
+  this_ptr->lifetime = 0.0;
+  return this_ptr;
+}

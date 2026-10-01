@@ -1,0 +1,78 @@
+// Name: core_platfrm.cpp_CPlatform_renderBackground_FUN_0054d9b0
+// Address: 0054d9b0
+// Address Range: [[0054d9b0, 0054db69]]
+// Convention: __cdecl
+// Signature: void __cdecl core_platfrm_cpp_CPlatform_renderBackground_FUN_0054d9b0(CPlatform *this_ptr,int layer_flag)
+
+#include "nocturne.h"
+
+void __cdecl core_platfrm_cpp_CPlatform_renderBackground_FUN_0054d9b0(CPlatform *this_ptr,int layer_flag)
+
+{
+  int iVar1;
+  int iVar2;
+  CBoundingBox3D *this_ptr_00;
+  CBoundingBox3D local_2c;
+  CVector3i CStack_14;
+  
+  iVar1 = engine_drender_cpp_CDemonRenderer_isShadowPass_FUN_0048cae0(g_CDemonRendererPtr2);
+  if (iVar1 != 0) {
+    return;
+  }
+  if (layer_flag == 0) {
+    return;
+  }
+  if ((this_ptr->one_shot < 2) && (this_ptr->render_in_background_when_not_moving_flag == 0)) {
+    return;
+  }
+  if (this_ptr->render_in_background_when_not_moving_flag != 0) {
+    if ((this_ptr->state == (PLATFORM_STATE_TYPE_WTF|PLATFORM_STATE_TYPE_AT_END)) ||
+       (this_ptr->state == 4)) {
+      return;
+    }
+    iVar2 = core_event_cpp_CEventList_evaluateCondition_FUN_004adca0
+                      (g_CEventListPtr,this_ptr->to_end_event);
+    if (iVar2 != 0) {
+      return;
+    }
+    iVar2 = core_event_cpp_CEventList_evaluateCondition_FUN_004adca0
+                      (g_CEventListPtr,this_ptr->to_start_event);
+    if (iVar2 != 0) {
+      return;
+    }
+  }
+  iVar2 = engine_drender_cpp_CDemonRenderer_isShadowPass_FUN_0048cae0(g_CDemonRendererPtr2);
+  if (iVar2 == 0) {
+    if (this_ptr->render_in_background_when_not_moving_flag == 0) {
+      this_ptr->one_shot = 3;
+    }
+    else {
+      this_ptr->rendered_in_background = 1;
+    }
+  }
+  core_actor_cpp_CDemonActor_setupRenderState_FUN_00408b00(&this_ptr->base);
+  this_ptr_00 = (*((this_ptr->base).vtable._ub)->getBoundingBox)(&this_ptr->base,&local_2c);
+  iVar2 = core_box_cpp_CBoundingBox3D_isVisible_FUN_004204f0(this_ptr_00);
+  if (iVar2 != 0) {
+    if ((this_ptr->recompute_fog == 0) ||
+       (iVar2 = engine_drender_cpp_CDemonRenderer_isShadowPass_FUN_0048cae0(g_CDemonRendererPtr2),
+       iVar2 != 0)) {
+      core_dmodel_cpp_CKeyFramedModelInstance_prepareForRendering_FUN_00478d20
+                (&this_ptr->model,0.0,-1);
+      core_actor_cpp_CDemonActor_restoreRenderState_FUN_00408b40(&this_ptr->base);
+      return;
+    }
+    g_CDemonSetPtr->per_pixel_lighting_enabled = 1;
+    CStack_14.x = (int)ROUND((this_ptr->base).location.position.x * 256.0f);
+    CStack_14.y = (int)ROUND((this_ptr->base).location.position.y * 256.0f);
+    CStack_14.z = (int)ROUND((this_ptr->base).location.position.z * 256.0f);
+    g_FlatShadingLightLevel =
+         (*((g_CurrentSceneCamera->base).vtable)->getFogValueAtPosition)
+                   (g_CurrentSceneCamera,&CStack_14,(SProjectedVertex *)0x0);
+    core_dmodel_cpp_CKeyFramedModelInstance_prepareForRendering_FUN_00478d20
+              (&this_ptr->model,0.0,-1);
+    g_CDemonSetPtr->per_pixel_lighting_enabled = 0;
+  }
+  core_actor_cpp_CDemonActor_restoreRenderState_FUN_00408b40(&this_ptr->base);
+  return;
+}

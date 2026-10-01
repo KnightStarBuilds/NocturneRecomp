@@ -1,0 +1,158 @@
+// Name: engine_texture.cpp_CTextureCache_loadTexture_FUN_005dcc00
+// Address: 005dcc00
+// MANUAL RECONSTRUCTION
+// Address Range: [[005dcc00, 005dd172]]
+// Convention: __cdecl
+// Signature: int __cdecl engine_texture_cpp_CTextureCache_loadTexture_FUN_005dcc00(CTextureCache *this_ptr,char *texture_name)
+
+#include "nocturne.h"
+
+int __cdecl engine_texture_cpp_CTextureCache_loadTexture_FUN_005dcc00(CTextureCache *this_ptr,char *texture_name)
+
+{
+  uint size;
+  byte *pbVar2;
+  _FILE *p_Var3;
+  void *pvVar4;
+  int iVar5;
+  int iVar6;
+  SIZE_T width;
+  char *pcVar7;
+  char local_114 [256];
+
+  size = engine_dosio_cpp_getFileSize_FUN_00481880("art",texture_name);
+  if (size < 0x4000) {
+    if (0x3ff < size) {
+      if (size < 0x401) {
+        width = 0x20;
+        goto LAB_005dcc85;
+      }
+      if (size == 0x1000) {
+        width = 0x40;
+        goto LAB_005dcc85;
+      }
+    }
+  }
+  else {
+    if (size < 0x4001) {
+      width = 0x80;
+      goto LAB_005dcc85;
+    }
+    if (size < 0x40000) {
+      if (size == 0x10000) {
+        width = 0x100;
+        goto LAB_005dcc85;
+      }
+    }
+    else {
+      if (size < 0x40001) {
+        width = 0x200;
+        goto LAB_005dcc85;
+      }
+      if (size == 0x100000) {
+        width = 0x400;
+        goto LAB_005dcc85;
+      }
+    }
+  }
+  _sprintf(local_114,"CTextureCache::load - Bad texture length : %s,%d",texture_name,size)
+  ;
+  g_CurrentLineNumber = 257;
+  g_CurrentFilename = "..\\engine\\texture.cpp";
+  core_main_c_displayErrorAndQuit_FUN_00506f10(local_114);
+  return 0;
+LAB_005dcc85:
+  if (this_ptr->texture_palette_ptrs[this_ptr->current_texture_count] == (byte *)0x0) {
+    pbVar2 = (byte *)shape_memdbg_cpp_debugMalloc_FUN_0050f250(0x300,"..\\engine\\texture.cpp",263);
+    this_ptr->texture_palette_ptrs[this_ptr->current_texture_count] = pbVar2;
+    if (this_ptr->texture_palette_ptrs[this_ptr->current_texture_count] == (byte *)0x0) {
+      g_CurrentFilename = "..\\engine\\texture.cpp";
+      g_CurrentLineNumber = 265;
+      core_main_c_displayErrorAndQuit_FUN_00506f10("CTextureCache::load - Out of memory.  Heap is probably trashed or you're out of VM");
+    }
+  }
+  strcpy(local_114,texture_name);
+  pcVar7 = strchr(local_114,'.');
+  if (pcVar7 == (char *)0x0) {
+    g_CurrentFilename = "..\\engine\\texture.cpp";
+    g_CurrentLineNumber = 273;
+    core_main_c_displayErrorAndQuit_FUN_00506f10("CTextureCache::load - Can't find extension");
+  }
+  _sprintf(pcVar7,".act");
+  p_Var3 = engine_dosio_cpp_getFile_FUN_00481a50("art",local_114,"rb");
+  if (p_Var3 == (_FILE *)0x0) {
+    memcpy(this_ptr->texture_palette_ptrs[this_ptr->current_texture_count],g_SourcePaletteData,0x300);
+  }
+  else {
+    _fread(this_ptr->texture_palette_ptrs[this_ptr->current_texture_count],0x100,3,p_Var3);
+    shape_memdbg_cpp_closeFile_FUN_0050f9b0(p_Var3,"..\\engine\\texture.cpp",279);
+  }
+  strcpy(this_ptr->texture_names[this_ptr->current_texture_count],texture_name);
+  if (width != this_ptr->texture_dimensions[this_ptr->current_texture_count]) {
+    if (this_ptr->texture_data_ptrs[this_ptr->current_texture_count] != (void *)0x0) {
+      shape_memdbg_cpp_debugFree_FUN_0050f460
+                (this_ptr->texture_data_ptrs[this_ptr->current_texture_count],
+                 "..\\engine\\texture.cpp",292);
+      if (this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count] != (void *)0x0) {
+        shape_memdbg_cpp_debugFree_FUN_0050f460
+                  (this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count],
+                   "..\\engine\\texture.cpp",294);
+        this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count] = (uchar *)0x0;
+      }
+    }
+    pvVar4 = shape_memdbg_cpp_debugMalloc_FUN_0050f250(size,"..\\engine\\texture.cpp",298);
+    this_ptr->texture_data_ptrs[this_ptr->current_texture_count] = (uchar *)pvVar4;
+    if (this_ptr->texture_data_ptrs[this_ptr->current_texture_count] == (void *)0x0) {
+      g_CurrentFilename = "..\\engine\\texture.cpp";
+      g_CurrentLineNumber = 300;
+      core_main_c_displayErrorAndQuit_FUN_00506f10("CTextureCache::load - Out of memory.  Heap is probably trashed or you're out of VM");
+    }
+  }
+  strcpy(local_114,texture_name);
+  pcVar7 = strchr(local_114,'.');
+  _sprintf(pcVar7,".raw");
+  p_Var3 = engine_dosio_cpp_getFile_FUN_00481a50("art",local_114,"rb");
+  if (p_Var3 == (_FILE *)0x0) {
+    memset
+              (this_ptr->texture_data_ptrs[this_ptr->current_texture_count],0,width * width);
+  }
+  else {
+    _fread(this_ptr->texture_data_ptrs[this_ptr->current_texture_count],width,width,p_Var3);
+    shape_memdbg_cpp_closeFile_FUN_0050f9b0(p_Var3,"..\\engine\\texture.cpp",314);
+  }
+  strcpy(local_114,texture_name);
+  pcVar7 = strchr(local_114,'.');
+  _sprintf(pcVar7,".opa");
+  p_Var3 = engine_dosio_cpp_getFile_FUN_00481a50("art",local_114,"rb");
+  if (p_Var3 == (_FILE *)0x0) {
+    if (this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count] != (void *)0x0) {
+      shape_memdbg_cpp_debugFree_FUN_0050f460
+                (this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count],
+                 "..\\engine\\texture.cpp",334);
+      this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count] = (uchar *)0x0;
+    }
+  }
+  else {
+    if (width != this_ptr->texture_dimensions[this_ptr->current_texture_count]) {
+      if (this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count] != (void *)0x0) {
+        shape_memdbg_cpp_debugFree_FUN_0050f460
+                  (this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count],
+                   "..\\engine\\texture.cpp",326);
+      }
+      pvVar4 = shape_memdbg_cpp_debugMalloc_FUN_0050f250(size,"..\\engine\\texture.cpp",328);
+      this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count] = (uchar *)pvVar4;
+    }
+    _fread(this_ptr->texture_opacity_ptrs[this_ptr->current_texture_count],width,width,p_Var3);
+    shape_memdbg_cpp_closeFile_FUN_0050f9b0(p_Var3,"..\\engine\\texture.cpp",331);
+  }
+  this_ptr->texture_dimensions[this_ptr->current_texture_count] = width;
+  iVar5 = this_ptr->current_texture_count;
+  iVar6 = this_ptr->current_texture_count + 1;
+  this_ptr->current_texture_count = iVar6;
+  if (this_ptr->max_texture_count <= iVar6) {
+    this_ptr->wrap_indicator = 1;
+    this_ptr->current_texture_count = 0;
+    return iVar5;
+  }
+  return iVar5;
+}

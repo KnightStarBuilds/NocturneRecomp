@@ -1,0 +1,46 @@
+// Name: shape_meshlod.cpp_CLodMesh_findOrAddLodTexture_FUN_00518790
+// Address: 00518790
+// MANUAL RECONSTRUCTION
+// Address Range: [[00518790, 00518863]]
+// Convention: __cdecl
+// Signature: int __cdecl shape_meshlod_cpp_CLodMesh_findOrAddLodTexture_FUN_00518790(CLodMesh *this_ptr,char *texture_filename)
+
+#include "nocturne.h"
+
+int __cdecl shape_meshlod_cpp_CLodMesh_findOrAddLodTexture_FUN_00518790(CLodMesh *this_ptr,char *texture_filename)
+
+{
+  int iVar2;
+  SMRGLTextureModel *pSVar3;
+  int iVar4;
+  int iVar5;
+  char *pcVar6;
+  
+  iVar4 = 0;
+  if (0 < this_ptr->lod_texture_count) {
+    iVar5 = 0;
+    do {
+      iVar2 = _stricmp
+                        (this_ptr->lod_textures->texture_name + iVar5,texture_filename);
+      if (iVar2 == 0) {
+        return iVar4;
+      }
+      iVar4 = iVar4 + 1;
+      iVar5 = iVar5 + sizeof(SMRGLTextureModel);
+    } while (iVar4 < this_ptr->lod_texture_count);
+  }
+  pSVar3 = (SMRGLTextureModel *)shape_memdbg_cpp_debugRealloc_FUN_0050f540
+                     (this_ptr->lod_textures,(this_ptr->lod_texture_count + 1) * sizeof(SMRGLTextureModel),
+                      "..\\shape\\meshlod.cpp",2925);
+  this_ptr->lod_textures = pSVar3;
+  if (pSVar3 == (SMRGLTextureModel *)0x0) {
+    g_CurrentFilename = "..\\shape\\meshlod.cpp";
+    g_CurrentLineNumber = 2926;
+    core_main_c_displayErrorAndQuit_FUN_00506f10("Out of memory.");
+  }
+  pcVar6 = this_ptr->lod_textures[this_ptr->lod_texture_count].texture_name;
+  strcpy(pcVar6,texture_filename);
+  iVar4 = this_ptr->lod_texture_count;
+  this_ptr->lod_texture_count = iVar4 + 1;
+  return iVar4;
+}

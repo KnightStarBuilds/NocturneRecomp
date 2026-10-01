@@ -1,0 +1,47 @@
+#pragma once
+
+// Type dependencies
+#include "system/basetypes.h"
+#include "types/classes/CDemonActorType.h"
+#include "types/classes/CPickList.h"
+#include "types/structs/SCameraDepthEntry.h"
+
+// =============================================================================
+// GLOBAL VARIABLES - Range 0x3650000
+// =============================================================================
+
+// CDemonActorType
+extern CDemonActorType g_CShotgunClassInfo;
+extern CDemonActorType g_CShovelClassInfo;
+extern CDemonActorType g_CSimBoxClassInfo;
+
+// CPickList
+extern CPickList g_MissingBackdropFiles;
+
+// SCameraDepthEntry*
+extern SCameraDepthEntry* g_CameraDepthData;
+
+// char[100][30]
+extern char g_BoneNameBuffer[100][30];
+
+// char[120][260]
+extern char g_MotionFilenames[120][260];
+
+// char[200][50]
+extern char g_SkeletonBoneNames[200][50];
+
+// char[500]
+extern char g_GroundTextureTypes[500];
+
+// char[500][40]
+extern char g_GroundTextureNames[500][40];
+
+// char[768]
+extern char g_ThumbnailPalette[768];
+
+// int
+extern int g_GroundTextureCount;
+
+// int[250]
+extern int g_CameraFogEnabledFlags[250];
+

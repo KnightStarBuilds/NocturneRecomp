@@ -1,0 +1,46 @@
+// Name: core_turret.cpp_CTurret_renderOpaque_FUN_005e2320
+// Address: 005e2320
+// Address Range: [[005e2320, 005e241a]]
+// Convention: __cdecl
+// Signature: int __cdecl core_turret_cpp_CTurret_renderOpaque_FUN_005e2320(CTurret *this_ptr)
+
+#include "nocturne.h"
+
+int __cdecl core_turret_cpp_CTurret_renderOpaque_FUN_005e2320(CTurret *this_ptr)
+
+{
+  CBoundingBox3D *this_ptr_00;
+  int iVar1;
+  CKeyFramedModel *pCVar2;
+  int iVar3;
+  CBoundingBox3D CStack_28;
+  float fStack_10;
+  
+  core_actor_cpp_CDemonActor_setupRenderState_FUN_00408b00((CDemonActor *)this_ptr);
+  this_ptr_00 = (*((this_ptr->base).base.vtable._ub)->getBoundingBox)
+                          ((CDemonActor *)this_ptr,&CStack_28);
+  iVar1 = core_box_cpp_CBoundingBox3D_isVisible_FUN_004204f0(this_ptr_00);
+  if (iVar1 != 0) {
+    iVar3 = -1;
+    fStack_10 = core_turret_cpp_CTurret_getCurFrame_FUN_005e2b30(this_ptr,0);
+    core_dmodel_cpp_CKeyFramedModelInstance_prepareForRendering_FUN_00478d20
+              (&(this_ptr->base).model,fStack_10,iVar3);
+  }
+  core_actor_cpp_CDemonActor_restoreRenderState_FUN_00408b40((CDemonActor *)this_ptr);
+  if (iVar1 != 0) {
+    pCVar2 = core_dmodel_cpp_CKeyFramedModelInstance_getModelPtr_FUN_00478d80(&this_ptr->model);
+    if (0 < pCVar2->poly_count) {
+      engine_drender_cpp_CDemonRenderer_processCameraRelativeVertex_FUN_0048c450
+                (g_CDemonRendererPtr2,&(this_ptr->base).base.location.position);
+      engine_drender_cpp_CDemonRenderer_applyScaledTransform_FUN_0048c4f0
+                (g_CDemonRendererPtr2,&(this_ptr->home_orient).vec,(CVector3f *)0x0);
+      iVar3 = -1;
+      fStack_10 = core_turret_cpp_CTurret_getCurFrame_FUN_005e2b30(this_ptr,1);
+      core_dmodel_cpp_CKeyFramedModelInstance_prepareForRendering_FUN_00478d20
+                (&this_ptr->model,fStack_10,iVar3);
+      engine_drender_cpp_CDemonRenderer_matrixPop_FUN_0048c640(g_CDemonRendererPtr2);
+      return iVar1;
+    }
+  }
+  return iVar1;
+}

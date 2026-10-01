@@ -1,0 +1,17 @@
+// Name: core_tentacle.cpp_staticInit_FUN_005daef0
+// Address: 005daef0
+// Address Range: [[005daef0, 005daf13]]
+// Convention: __cdecl
+// Signature: void __cdecl core_tentacle_cpp_staticInit_FUN_005daef0(void)
+
+#include "nocturne.h"
+
+void __cdecl core_tentacle_cpp_staticInit_FUN_005daef0(void)
+
+{
+  core_actor_cpp_registerActorClass_FUN_0040c2e0
+            (&g_CTentacleClassInfo,"CTentacle",
+             core_tentacle_cpp_factoryFuncTentacle_FUN_005daf20,&g_CTentacleClassVersion,2,
+             &g_CEnemyClassInfo);
+  return;
+}

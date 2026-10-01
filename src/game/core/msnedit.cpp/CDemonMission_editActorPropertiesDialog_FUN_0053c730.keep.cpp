@@ -1,0 +1,61 @@
+// Name: core_msnedit.cpp_CDemonMission_editActorPropertiesDialog_FUN_0053c730
+// Address: 0053c730
+// MANUAL RECONSTRUCTION
+// Address Range: [[0053c730, 0053c8c7]]
+// Convention: __cdecl
+// Signature: void __cdecl core_msnedit_cpp_CDemonMission_editActorPropertiesDialog_FUN_0053c730(CDemonMission *this_ptr)
+
+#include "nocturne.h"
+
+void __cdecl core_msnedit_cpp_CDemonMission_editActorPropertiesDialog_FUN_0053c730(CDemonMission *this_ptr)
+
+{
+  int iVar5;
+  CPickList CStack_540;
+  char acStack_198 [300];
+  char local_6c [100];
+  uint window_flags;
+  byte bVar6;
+  
+  bVar6 = 0;
+  core_actor_cpp_CActorPropertyList_resetSelection_FUN_0040e150(&g_MsnEditPropertyList);
+  if (this_ptr->selected_actor != (CDemonActor *)0x0) {
+    memcpy(local_6c,g_MsnEditLastSelectedPropertyName,100);
+    while( true ) {
+      core_actor_cpp_CActorPropertyList_resetSelection_FUN_0040e150(&g_MsnEditPropertyList);
+      (*((this_ptr->selected_actor->vtable)._ub)->getPropertyList)
+                (this_ptr->selected_actor,&g_MsnEditPropertyList);
+      iVar5 = 0;
+      shape_edittool_cpp_CPickList_ctor_FUN_004a3b90(&CStack_540);
+      if (0 < g_MsnEditPropertyList.count) {
+        do {
+          core_actor_cpp_CActorProperty_renderValue_FUN_0040ea50
+                    (g_MsnEditPropertyList.properties + iVar5,this_ptr->selected_actor,
+                     g_MsnEditPropertyValueBuffer);
+          _sprintf
+                    (g_MsnEditPropertyFormatBuffer,"%s\t%s",
+                     g_MsnEditPropertyList.properties[iVar5].name,
+                     g_MsnEditPropertyValueBuffer);
+          iVar5 = iVar5 + 1;
+          shape_edittool_cpp_CStrList_add_FUN_004a2b80
+                    (&CStack_540.base,g_MsnEditPropertyFormatBuffer);
+        } while (iVar5 < g_MsnEditPropertyList.count);
+      }
+      _sprintf
+                (acStack_198,"Edit %s properties",this_ptr->selected_actor->actor_name);
+      window_flags = 0;
+      iVar5 = shape_edittool_cpp_CStrList_findByFirstField_FUN_004a3070(&CStack_540.base,local_6c);
+      iVar5 = shape_edittool_cpp_CPickList_displayChoicesAndWaitForInput_FUN_004a3e20
+                        (&CStack_540,acStack_198,iVar5,window_flags);
+      if (iVar5 < 0) break;
+      strcpy(local_6c,g_MsnEditPropertyList.properties[iVar5].name);
+      if (g_MsnEditPropertyList.properties[iVar5].enabled_flag != 0) {
+        core_actor_cpp_CActorProperty_editInteractive_FUN_0040eed0
+                  (g_MsnEditPropertyList.properties + iVar5,this_ptr->selected_actor);
+      }
+      shape_edittool_cpp_CPickList_dtor_FUN_004a3c80(&CStack_540,0);
+    }
+    shape_edittool_cpp_CPickList_dtor_FUN_004a3c80(&CStack_540,0);
+  }
+  return;
+}

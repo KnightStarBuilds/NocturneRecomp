@@ -1,0 +1,160 @@
+// Name: core_dcamera.cpp_CDemonCamera_saveBackdrop_FUN_004529b0
+// Address: 004529b0
+// MANUAL RECONSTRUCTION
+// Address Range: [[004529b0, 00453010]]
+// Convention: __cdecl
+// Signature: void __cdecl core_dcamera_cpp_CDemonCamera_saveBackdrop_FUN_004529b0(CDemonCamera *this_ptr)
+
+#include "nocturne.h"
+#include "watcom/stream_compat.h"
+
+void __cdecl core_dcamera_cpp_CDemonCamera_saveBackdrop_FUN_004529b0(CDemonCamera *this_ptr)
+
+{
+  _FILE *file_ptr;
+  uint uVar1;
+  uint uVar2;
+  int iVar2;
+  int iVar3;
+  char cVar4;
+  int *piVar5;
+  int iVar4;
+  int iVar6;
+  char *pcVar7;
+  CVector3i *end_pos;
+  char local_274 [256];
+  char local_f8 [100];
+  CLZWCompress local_94;
+  CVector3i local_5c;
+  int local_4c;
+  int local_2c;
+  int local_28;
+  int local_18;
+
+  g_BackdropSaveActive = 1;
+  g_ImageProcessingState1 = 0;
+  g_ImageProcessingState2 = 0;
+  core_dcamera_cpp_resetFogSamplingOffset_FUN_0044bb70(&g_CameraFogGrid);
+  g_ImageBytesPerPixel = 0x10;
+  if ((g_CameraFogGrid.scroll_vector.x == 0 && g_CameraFogGrid.scroll_vector.y == 0) &&
+      g_CameraFogGrid.scroll_vector.z == 0) {
+    g_ImageBytesPerPixel = 1;
+  }
+  _sprintf(local_274,"%s.fog",this_ptr->camera_name);
+  file_ptr = engine_dosio_cpp_getFile_FUN_00481a50("backdrop",local_274,"rb");
+  if (file_ptr != (_FILE *)0x0) {
+    shape_memdbg_cpp_closeFile_FUN_0050f9b0(file_ptr,"..\\core\\dcamera.cpp",4821);
+    return;
+  }
+  _sprintf(local_f8,"backdrop\\%s",local_274);
+  // Missing fog caches belong to the profile, never the immutable data overlay.
+  // The original installation had this directory; a new native profile may not.
+  _mkdir("backdrop");
+  std::ofstream ofs;
+  watcom_stream_open(ofs, local_f8, std::ios::out | std::ios::binary);
+  if (ofs.fail()) {
+    g_CurrentFilename = "..\\core\\dcamera.cpp";
+    g_CurrentLineNumber = 4828;
+    core_main_c_displayErrorAndQuit_FUN_00506f10("Can't create %s",local_f8);
+  }
+  ofs.write((char *)&g_CameraFogGrid, 0x1000);
+  if (g_CameraFogGrid.density_multiplier != 0) {
+    ofs.write("EFD", 3);
+    local_5c.x = (int)ROUND(ROUND((double)(this_ptr->base).position.f.x * 256)
+                           );
+    local_5c.y = (int)ROUND(ROUND((double)(this_ptr->base).position.f.y * 256)
+                           );
+    local_5c.z = (int)ROUND(ROUND(256 * (double)(this_ptr->base).position.f.z)
+                           );
+    support_codec_cpp_CLZWCompress_ctor_FUN_0043f2d0(&local_94,0x10000,6);
+    support_codec_cpp_CLZWCompress_init_FUN_0043f320(&local_94);
+    local_18 = 0;
+    if (0 < g_ImageBytesPerPixel) {
+      do {
+        core_dcamera_cpp_updateFogScrollOffset_FUN_0044bfb0(&g_CameraFogGrid,local_18,0);
+        for (local_28 = 1; local_28 < this_ptr->display_height; local_28 = local_28 + 1) {
+          end_pos = &g_PrecomputedWorldPositions[local_28 * 320];
+          piVar5 = &g_PrecomputedDepthBuffer[local_28 * 320];
+          pcVar7 = g_CameraPlaneWorkBuffer.pixels[local_28];
+          for (iVar6 = 1; iVar6 < this_ptr->display_width; iVar6 = iVar6 + 1) {
+            if (*piVar5 == 0x7fffffff) {
+              *pcVar7 = -1;
+            }
+            else {
+              uVar1 = core_dcamera_cpp_sampleFogAlongRay_FUN_0044bdd0
+                                (&g_CameraFogGrid,&local_5c,end_pos,*piVar5);
+              uVar2 = uVar1 * 0xff >> 0xe;
+              if (0xff < uVar2) {
+                uVar2 = 0xff;
+              }
+              *pcVar7 = (char)uVar2;
+            }
+            end_pos = end_pos + 1;
+            pcVar7 = pcVar7 + 1;
+            piVar5 = piVar5 + 1;
+          }
+        }
+        core_dcamera_cpp_CDemonCamera_copyFogPlaneToBuffer_FUN_00453020(this_ptr,local_18);
+        local_2c = 0;
+        if (0 < this_ptr->display_height) {
+          do {
+            iVar3 = 0;
+            iVar4 = 0;
+            if (0 < this_ptr->display_width) {
+              do {
+                uVar2 = (uint)(byte)g_CameraImageDecompressBuffer[local_18].pixels[local_2c][iVar3];
+                if (0 < local_18) {
+                  uVar2 = uVar2 - (byte)g_CameraImageDecompressBuffer[local_18 - 1]
+                                        .pixels[local_2c][iVar3];
+                }
+                iVar2 = ((int)uVar2 >> 2) - iVar4;
+                if (iVar2 < -0x20) {
+                  iVar2 = -0x20;
+                }
+                else if (0x3f < iVar2) {
+                  iVar2 = 0x3f;
+                }
+                g_CameraPlaneWorkBuffer.pixels[local_2c][iVar3] = (char)iVar2;
+                iVar4 = iVar2 + iVar4;
+                cVar4 = (char)iVar4 * '\x04';
+                if (0 < local_18) {
+                  cVar4 = cVar4 + g_CameraImageDecompressBuffer[local_18 - 1]
+                                  .pixels[local_2c][iVar3];
+                }
+                g_CameraImageDecompressBuffer[local_18].pixels[local_2c][iVar3] = cVar4;
+                iVar3 = iVar3 + 1;
+              } while (iVar3 < this_ptr->display_width);
+            }
+            local_2c = local_2c + 1;
+          } while (local_2c < this_ptr->display_height);
+        }
+        local_4c = 0x12c00;
+        iVar4 = support_codec_cpp_CCodec_processFromBuffer_FUN_0043eb30
+                          (&local_94.base,(char *)&g_CameraPlaneWorkBuffer,&local_4c,
+                           watcom_ostream_from(ofs));
+        if (iVar4 == 0) {
+          g_CurrentFilename = "..\\core\\dcamera.cpp";
+          g_CurrentLineNumber = 4937;
+          core_main_c_displayErrorAndQuit_FUN_00506f10("Error compressing %s",local_f8);
+        }
+        if (local_4c != 0) {
+          g_CurrentFilename = "..\\core\\dcamera.cpp";
+          g_CurrentLineNumber = 4939;
+          core_main_c_displayErrorAndQuit_FUN_00506f10("Not all bytes consumed compressing %s",local_f8)
+          ;
+        }
+        if (ofs.fail()) {
+          g_CurrentLineNumber = 4940;
+          g_CurrentFilename = "..\\core\\dcamera.cpp";
+          core_main_c_displayErrorAndQuit_FUN_00506f10("Error writing compressed file %s",local_f8)
+          ;
+        }
+        local_18 = local_18 + 1;
+      } while (local_18 < g_ImageBytesPerPixel);
+    }
+    support_codec_cpp_CLZWCompress_finalize_FUN_0043f440(&local_94,watcom_ostream_from(ofs));
+    support_codec_cpp_CLZWDictionary_dtor_FUN_0043edf0(&local_94.dictionary,0);
+    support_codec_cpp_CCodec_dtor_FUN_0043e9b0(&local_94.base,1);
+  }
+  return;
+}

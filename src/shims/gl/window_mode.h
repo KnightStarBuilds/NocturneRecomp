@@ -1,0 +1,78 @@
+#pragma once
+
+// =============================================================================
+// WINDOW MODE — windowed / fullscreen / borderless
+// =============================================================================
+//
+// An addition, not a reconstruction. The original was DirectDraw exclusive
+// fullscreen only: it asks for DDSCL_FULLSCREEN and has no concept of a window
+// mode, so there is nothing here to be faithful to. The ddraw shim strips that
+// flag and consults this setting instead.
+//
+// Persistence rides on the game's own INI rather than a side file. The engine's
+// CIni::writeProfileString is a read-modify-write — it streams the existing file
+// through a temp copy and replaces or appends a single key — so a key the shim
+// adds survives the game's writeIniData, and the game's keys survive ours. That
+// makes "[Graphics] windowMode" safe to add from outside inivar.cpp without
+// touching the generated globals or needing a new game-side variable.
+//
+// Note the ordering constraint: the INI accessors run against g_CIniInstance,
+// which the engine sets up during startup. Nothing here may be called before
+// readIniData has run — nocturne_window_mode_get() loads lazily on first use for
+// exactly that reason.
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum {
+    NOCTURNE_WINDOW_MODE_WINDOWED   = 0,
+    NOCTURNE_WINDOW_MODE_FULLSCREEN = 1,  // real mode-setting fullscreen
+    NOCTURNE_WINDOW_MODE_BORDERLESS = 2,  // desktop-sized, no decorations
+    NOCTURNE_WINDOW_MODE_COUNT      = 3
+};
+
+// Current mode, loaded from the INI on first call. Defaults to windowed.
+int nocturne_window_mode_get(void);
+
+// Set and persist the mode. Applies immediately if a window exists.
+void nocturne_window_mode_set(int mode);
+
+// Advance the mode by `step`, wrapping. Returns the new mode. The Options
+// screen passes -1 for a left press and +1 for right, which is how the
+// engine's own three-state lines read g_MenuLeftRightPressed.
+int nocturne_window_mode_cycle(int step);
+
+// Display name for a mode ("Windowed" / "Fullscreen" / "Borderless").
+const char *nocturne_window_mode_name(int mode);
+
+// Push the current mode onto `window`. Called by the ddraw shim after it sizes
+// the window, and again whenever the mode changes. Safe with a null window.
+void nocturne_window_mode_apply(struct SDL_Window *window);
+
+// Resize the OS window WITHOUT changing the game's render resolution, and
+// record that size as the one the window is meant to keep.
+//
+// This is what makes the resolution selector do something on the main menu. The
+// menu's layout is hardcoded for 640x480 (fixed drawText coordinates; only the
+// mouse-sensitivity slider reads g_WindowWidth), so re-rendering it at a larger
+// framebuffer would leave it drawn in a corner. Instead the render stays 640x480
+// and the presenter scales it to whatever size the window now is. A mission,
+// which does go through CGame::setGameRes, still gets a real framebuffer at the
+// selected resolution.
+//
+// The size is remembered even when it cannot be applied — before the window
+// exists, or while fullscreen or borderless owns the size — so it is also the
+// size windowed mode returns to. Callers pass the resolution the player chose:
+// the engine's own render resolution is not it, since the front end, the
+// opening movie and the Options screen all run at 640x480 regardless.
+void nocturne_window_set_size(int width, int height);
+
+// The size above, if one has been set. Returns 0 and touches nothing otherwise.
+// SetDisplayMode consults this so that a render-resolution change does not move
+// the window.
+int nocturne_window_preferred_size(int *width, int *height);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,0 +1,323 @@
+# -----------------------------------------------------------------------------
+# bundledlibs.cmake — build SDL2, SDL2_ttf, and FFmpeg from source for the exe
+# lane, on macOS, Linux and Windows.
+#
+# Why source instead of apt: it makes every lane reproducible and identical, and
+# avoids depending on whichever SDL the host happens to have (this host, for
+# instance, ships only a source-built SDL3, so `pkg_check_modules(sdl2 REQUIRED)`
+# there would fail configure).
+#
+# This module reproduces the variable contract that pkg_check_modules() set:
+#   SDL2_INCLUDE_DIRS / SDL2_CFLAGS_OTHER / SDL2_LIBRARIES
+#   SDL2TTF_INCLUDE_DIRS / SDL2TTF_CFLAGS_OTHER / SDL2TTF_LIBRARIES
+#   FFMPEG_INCLUDE_DIRS / FFMPEG_CFLAGS_OTHER / FFMPEG_LIBRARIES
+# so the rest of CMakeLists.txt consumes them unchanged.
+#
+# The CMake sub-builds (SDL2 / SDL2_ttf) inherit the target from the toolchain's
+# CMAKE_C/CXX_FLAGS_INIT. FFmpeg (autotools, not CMake) has to be told, and gets
+# the arch passed explicitly below.
+# -----------------------------------------------------------------------------
+
+include(FetchContent)
+include(ExternalProject)
+
+# Preserve the Linux runtime lookup convention; FFmpeg uses the target CPU.
+set(_noc_multiarch "x86_64-linux-gnu")
+set(_noc_ff_arch "${CMAKE_SYSTEM_PROCESSOR}")
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(arm64|aarch64)$")
+    set(_noc_ff_arch "aarch64")
+endif()
+
+# Which host the sub-builds are told they are targeting. The two CMake ones
+# (SDL2, SDL2_ttf) inherit it from the toolchain and need nothing here; FFmpeg
+# configures itself with autotools and has to be told, along with the cross
+# prefix its own build tools are found under.
+if(APPLE)
+    set(_noc_ff_os "darwin")
+elseif(WIN32)
+    set(_noc_ff_os "mingw32")
+else()
+    set(_noc_ff_os "linux")
+endif()
+
+# deps/manifest.json owns archive versions and checksums; preparation is offline
+# from here onward and CMake consumes only its verified build-local copies.
+
+# ----------------------------------------------------------------------------
+# SDL2 (shared). Backends (X11/Wayland/PulseAudio/ALSA/PipeWire) are dlopen'd
+# at runtime, so the libraries are not linked — but SDL compiles a backend only
+# when its -dev HEADERS are found at configure time, and silently drops it
+# otherwise. Without them the result has only the offscreen/dummy drivers: no
+# window and no sound. The check after FetchContent_MakeAvailable enforces it.
+# ----------------------------------------------------------------------------
+set(SDL_SHARED ON  CACHE BOOL "" FORCE)
+set(SDL_STATIC OFF CACHE BOOL "" FORCE)
+set(SDL_TEST   OFF CACHE BOOL "" FORCE)
+set(SDL2_DISABLE_INSTALL ON CACHE BOOL "" FORCE)
+# Optional input/IME backends that need build-time -dev HEADERS (libudev.h,
+# dbus/dbus.h, ibus). We never install those -dev packages (multilib hazard on
+# the 32-bit lane), and these features — joystick hotplug, dbus screensaver/IME
+# — are unused by this render/audio harness. Force them off so the from-source
+# SDL2 build doesn't depend on those headers being present on the host.
+set(SDL_LIBUDEV OFF CACHE BOOL "" FORCE)
+set(SDL_DBUS    OFF CACHE BOOL "" FORCE)
+set(SDL_IBUS    OFF CACHE BOOL "" FORCE)
+set(SDL_HIDAPI  OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(sdl2 SOURCE_DIR "${NOCTURNE_DEPS_SOURCE_DIR}/sdl2")
+if(APPLE)
+    set(SDL_COCOA ON CACHE BOOL "" FORCE)
+    set(SDL_COREAUDIO ON CACHE BOOL "" FORCE)
+    set(SDL_X11 OFF CACHE BOOL "" FORCE)
+    set(SDL_WAYLAND OFF CACHE BOOL "" FORCE)
+    set(SDL_METAL OFF CACHE BOOL "" FORCE)
+endif()
+
+# ----------------------------------------------------------------------------
+# SDL2_ttf (shared, vendored freetype + harfbuzz — built static inside the
+# subproject so we don't need libfreetype-dev either).
+# ----------------------------------------------------------------------------
+set(SDL2TTF_VENDORED ON  CACHE BOOL "" FORCE)
+set(SDL2TTF_SAMPLES  OFF CACHE BOOL "" FORCE)
+set(SDL2TTF_INSTALL  OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(sdl2_ttf SOURCE_DIR "${NOCTURNE_DEPS_SOURCE_DIR}/sdl2_ttf")
+
+message(STATUS "bundledlibs: verified local SDL2 + SDL2_ttf for ${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
+
+# SDL_ttf's vendored freetype still opens with cmake_minimum_required(VERSION 3.0).
+# That is a declaration about *freetype's* compatibility floor, not about the CMake
+# we run: declaring 3.0 asks CMake to set every policy in that subtree to its
+# 2014-era OLD behavior, and it is that emulation which is going away. Hence a
+# deprecation warning on every configure from CMake 3.27 onward.
+#
+# Apply compatibility policy settings to the dependency subdirectories without
+# changing their sources. The defaults are restored immediately afterward.
+#
+# Two separate things are needed, because they solve different problems:
+#
+#   CMAKE_WARN_DEPRECATED=OFF   silences the diagnostic. Cosmetic only.
+#   CMAKE_POLICY_VERSION_MINIMUM  raises the floor CMake actually applies. This is
+#                               load-bearing on CMake >= 4.0, where support for
+#                               declared minimums below 3.5 was *removed* and the
+#                               warning became a hard configure error — at which
+#                               point suppressing warnings saves nothing.
+#
+# The variable arrived in CMake 3.31, so set it only where it exists; on older
+# CMake the low floor is still honored and the suppression above is enough.
+if(DEFINED CMAKE_WARN_DEPRECATED)
+    set(_noc_warn_deprecated_saved "${CMAKE_WARN_DEPRECATED}")
+    set(_noc_warn_deprecated_was_set TRUE)
+else()
+    set(_noc_warn_deprecated_was_set FALSE)
+endif()
+set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+
+set(_noc_policy_min_applied FALSE)
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.31" AND NOT DEFINED CMAKE_POLICY_VERSION_MINIMUM)
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+    set(_noc_policy_min_applied TRUE)
+endif()
+
+FetchContent_MakeAvailable(sdl2 sdl2_ttf)
+if(APPLE)
+    file(READ "${sdl2_BINARY_DIR}/SDL_config.h.intermediate" _sdl_config)
+    foreach(_driver VIDEO_DRIVER_COCOA AUDIO_DRIVER_COREAUDIO)
+        if(NOT _sdl_config MATCHES "#define SDL_${_driver} 1")
+            message(FATAL_ERROR "SDL2 requires the macOS ${_driver} backend")
+        endif()
+    endforeach()
+endif()
+
+# An SDL with no display or audio backend still configures, builds and runs:
+# it opens an invisible offscreen window and plays into the dummy device. Fail
+# here instead of shipping that.
+if(NOT WIN32 AND NOT APPLE)
+    # SDL_config.h itself is written at generate time, after this runs; the
+    # intermediate carries the same #defines and exists by the end of configure.
+    set(_sdl_config_h "${sdl2_BINARY_DIR}/SDL_config.h.intermediate")
+    if(NOT EXISTS "${_sdl_config_h}")
+        message(FATAL_ERROR "bundledlibs: ${_sdl_config_h} not found")
+    endif()
+    file(STRINGS "${_sdl_config_h}" _sdl_drivers
+         REGEX "^#define SDL_(VIDEO|AUDIO)_DRIVER_(X11|WAYLAND|PULSEAUDIO|ALSA|PIPEWIRE) 1")
+    if(NOT _sdl_drivers MATCHES "VIDEO_DRIVER_(X11|WAYLAND)")
+        message(FATAL_ERROR "bundledlibs: SDL2 was configured without an X11 or Wayland "
+            "video driver, so the game would open no window. Install the headers "
+            "(libx11-dev libxext-dev libxcursor-dev libxi-dev libxfixes-dev "
+            "libxrandr-dev libxss-dev libwayland-dev libxkbcommon-dev "
+            "wayland-protocols libegl-dev libdecor-0-dev) and delete ${sdl2_BINARY_DIR}.")
+    endif()
+    if(NOT _sdl_drivers MATCHES "AUDIO_DRIVER_(PULSEAUDIO|ALSA|PIPEWIRE)")
+        message(FATAL_ERROR "bundledlibs: SDL2 was configured without a PulseAudio, "
+            "ALSA or PipeWire audio driver, so the game would play no sound. Install "
+            "the headers (libpulse-dev libasound2-dev) and delete ${sdl2_BINARY_DIR}.")
+    endif()
+endif()
+
+if(_noc_policy_min_applied)
+    unset(CMAKE_POLICY_VERSION_MINIMUM)
+endif()
+if(_noc_warn_deprecated_was_set)
+    set(CMAKE_WARN_DEPRECATED "${_noc_warn_deprecated_saved}" CACHE BOOL "" FORCE)
+else()
+    unset(CMAKE_WARN_DEPRECATED CACHE)
+endif()
+
+# ----------------------------------------------------------------------------
+# Runtime dlopen compat shim.
+# SDL2's X11 and ALSA/Pulse backends dlopen the UNVERSIONED soname (libX11.so,
+# libpulse.so, ...), which ships in the -dev packages rather than the runtime
+# ones. Where they are missing the dlopen fails and SDL silently falls back to
+# the headless "offscreen" video driver → no window. Recreate the unversioned
+# symlinks in a build-local dir and put that dir on LD_LIBRARY_PATH (via the
+# a launcher) so the dlopens can resolve with no system change. A desktop host
+# usually has them already, in which case this just reproduces what is there.
+#
+# None of this applies to the Windows lanes. There the video and audio backends
+# are GDI/Direct3D and WASAPI/DirectSound, all of them system DLLs resolved by
+# name with no versioned-soname convention to work around, so the whole
+# mechanism is skipped rather than given a Windows spelling.
+if(NOT WIN32 AND NOT APPLE)
+    set(_sdl_compat_dir "${CMAKE_BINARY_DIR}/sdl-compat")
+    file(MAKE_DIRECTORY "${_sdl_compat_dir}")
+    set(_runtime_libdir "/usr/lib/${_noc_multiarch}")
+    foreach(_soname X11 Xext Xcursor Xi Xfixes Xrandr Xss pulse asound)
+        file(GLOB _versioned "${_runtime_libdir}/lib${_soname}.so.[0-9]*")
+        if(_versioned)
+            list(SORT _versioned)
+            list(GET _versioned 0 _target)   # soname (e.g. libX11.so.6) sorts before libX11.so.6.4.0
+            file(CREATE_LINK "${_target}" "${_sdl_compat_dir}/lib${_soname}.so" SYMBOLIC)
+        else()
+            message(STATUS "bundledlibs: no ${_noc_multiarch} runtime lib for lib${_soname}.so (backend will be unavailable)")
+        endif()
+    endforeach()
+endif()
+
+# The shims include <SDL.h> / <SDL_ttf.h> (no SDL2/ prefix), and SDL2's headers
+# live across the source tree plus a generated-config dir. Forward the targets'
+# INTERFACE_INCLUDE_DIRECTORIES so the shim OBJECT library — which only gets
+# include dirs, not linked libraries — resolves them. (The final exe links
+# SDL2_LIBRARIES below, which carries the same usage requirements.)
+set(SDL2_INCLUDE_DIRS    "$<TARGET_PROPERTY:SDL2::SDL2,INTERFACE_INCLUDE_DIRECTORIES>")
+set(SDL2_CFLAGS_OTHER    "")
+set(SDL2_LIBRARIES       SDL2::SDL2)
+set(SDL2TTF_INCLUDE_DIRS "$<TARGET_PROPERTY:SDL2_ttf::SDL2_ttf,INTERFACE_INCLUDE_DIRECTORIES>")
+set(SDL2TTF_CFLAGS_OTHER "")
+set(SDL2TTF_LIBRARIES    SDL2_ttf::SDL2_ttf)
+
+# ----------------------------------------------------------------------------
+# FFmpeg (static, autotools). Every external codec/library dependency is
+# disabled so the static libs need only libc/libm — nothing here pulls a -dev
+# package. Built once via ExternalProject and cached; rebuilds only when
+# its prepared source changes. x86asm stays disabled on all platforms so no
+# nasm/yasm is required (the codecs this harness decodes don't need it).
+# ----------------------------------------------------------------------------
+set(_ff_root    "${CMAKE_BINARY_DIR}/ffmpeg")
+set(_ff_install "${_ff_root}/install")
+set(_ff_libdir  "${_ff_install}/lib")
+
+# Base configure args shared by every lane; --arch and --target-os are keyed
+# off the target.
+set(_ff_args
+    --cc=${CMAKE_C_COMPILER} --ld=${CMAKE_C_COMPILER}
+    --arch=${_noc_ff_arch} --target-os=${_noc_ff_os}
+    --enable-static --disable-shared --enable-pic
+    --disable-programs --disable-doc --disable-network --disable-debug
+    --disable-x86asm
+    --disable-zlib --disable-bzlib --disable-lzma --disable-iconv
+    --disable-libxcb --disable-sdl2 --disable-autodetect)
+if(WIN32 AND CMAKE_CROSSCOMPILING)
+    # configure builds and runs small probe programs to decide what the target
+    # supports. Cross-compiling, it cannot run them, so --enable-cross-compile
+    # switches it to compile-only probes. The target triple has to reach clang
+    # through --extra-cflags as well: --cc names the driver but not what it
+    # should aim at, and a bare `clang` would happily probe the host.
+    #
+    # ar/nm/ranlib come from binutils-mingw-w64, pulled in alongside the
+    # compiler. They are named explicitly because the host's own would produce
+    # archives with the wrong object format.
+    list(APPEND _ff_args
+        --enable-cross-compile
+        --cross-prefix=${NOCTURNE_WIN_TRIPLE}-
+        --ar=${NOCTURNE_WIN_TRIPLE}-ar
+        --nm=${NOCTURNE_WIN_TRIPLE}-nm
+        --ranlib=${NOCTURNE_WIN_TRIPLE}-ranlib
+        --extra-cflags=--target=${NOCTURNE_WIN_TRIPLE}
+        --extra-ldflags=--target=${NOCTURNE_WIN_TRIPLE})
+endif()
+
+# How configure gets invoked. FFmpeg's is a shell script, and on the two Linux
+# -hosted lanes it runs directly off its shebang.
+#
+# Building natively under MSYS2 it cannot. CMake substitutes <SOURCE_DIR> and
+# <INSTALL_DIR> as native Windows paths (C:/...), and configure is a POSIX
+# script that reads a --prefix of that shape as a relative path with a stray
+# colon. The wrapper runs them through cygpath first, which is the one thing
+# that has to happen before configure sees them.
+if(WIN32 AND NOT CMAKE_CROSSCOMPILING)
+    set(_ff_configure
+        sh "${CMAKE_CURRENT_LIST_DIR}/ffmpeg_configure_msys2.sh"
+        <SOURCE_DIR> <INSTALL_DIR> ${_ff_args})
+else()
+    set(_ff_configure
+        <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> ${_ff_args})
+endif()
+
+if(APPLE)
+    execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE _noc_sdk
+        OUTPUT_STRIP_TRAILING_WHITESPACE COMMAND_ERROR_IS_FATAL ANY)
+    list(APPEND _ff_configure --sysroot=${_noc_sdk}
+        --extra-cflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}
+        --extra-ldflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET})
+    set(_ff_configure "${CMAKE_COMMAND}" -E env
+        --unset=CPPFLAGS --unset=CFLAGS --unset=CXXFLAGS --unset=LDFLAGS
+        "SDKROOT=${_noc_sdk}" "MACOSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
+        ${_ff_configure})
+endif()
+
+ExternalProject_Add(ffmpeg_ext
+    SOURCE_DIR "${NOCTURNE_DEPS_SOURCE_DIR}/ffmpeg"
+    DOWNLOAD_COMMAND ""
+    UPDATE_COMMAND ""
+    PREFIX         "${_ff_root}"
+    INSTALL_DIR    "${_ff_install}"
+    CONFIGURE_COMMAND ${_ff_configure}
+    BUILD_COMMAND   make -j8
+    INSTALL_COMMAND make install
+    BUILD_IN_SOURCE 0
+    BUILD_BYPRODUCTS
+        "${_ff_libdir}/libavformat.a"
+        "${_ff_libdir}/libavcodec.a"
+        "${_ff_libdir}/libswscale.a"
+        "${_ff_libdir}/libswresample.a"
+        "${_ff_libdir}/libavutil.a")
+
+# ExternalProject builds at build time, so the install tree doesn't exist at
+# configure. Pre-create the include dir so target_include_directories doesn't
+# warn, and express the link set as plain paths + an explicit build-order dep.
+file(MAKE_DIRECTORY "${_ff_install}/include")
+set(FFMPEG_INCLUDE_DIRS "${_ff_install}/include")
+set(FFMPEG_CFLAGS_OTHER "")
+# Static link order: dependents before dependencies; avutil last. libavcodec
+# pulls libswresample (e.g. the opus decoder's swr_* calls), so it must appear
+# before avutil too. -lm for the math FFmpeg uses; pthread for its threading.
+set(FFMPEG_LIBRARIES
+    "${_ff_libdir}/libavformat.a"
+    "${_ff_libdir}/libavcodec.a"
+    "${_ff_libdir}/libswscale.a"
+    "${_ff_libdir}/libswresample.a"
+    "${_ff_libdir}/libavutil.a")
+if(WIN32)
+    # No -lm: the mingw runtime has the math functions in libmsvcrt, and there
+    # is no separate libm to ask for. Threading comes from libwinpthread, which
+    # the posix-model runtime links by default, so it is not named either.
+    # bcrypt is avutil's: it is where BCryptGenRandom lives, which is how
+    # av_get_random_seed seeds itself on this target.
+    list(APPEND FFMPEG_LIBRARIES bcrypt)
+else()
+    # -lm for the math FFmpeg uses; pthread for its threading.
+    list(APPEND FFMPEG_LIBRARIES m pthread)
+endif()
+
+# Re-exported to CMakeLists so it can add_dependencies() the consuming targets
+# on ffmpeg_ext (headers must exist before the shim TU compiles).
+set(NOCTURNE_FFMPEG_DEP ffmpeg_ext)

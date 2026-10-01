@@ -1,0 +1,26 @@
+// Name: shape_design.c_findTextureByFilename_FUN_0046dfc0
+// Address: 0046dfc0
+// Address Range: [[0046dfc0, 0046e024]]
+// Convention: __cdecl
+// Signature: int __cdecl shape_design_c_findTextureByFilename_FUN_0046dfc0(char *filename)
+
+#include "nocturne.h"
+
+int __cdecl shape_design_c_findTextureByFilename_FUN_0046dfc0(char *filename)
+
+{
+  int iVar1;
+  int local_14;
+  
+  local_14 = 0;
+  while( true ) {
+    if (g_TextureProcessedCount <= local_14) {
+      return -1;
+    }
+    iVar1 = _stricmp
+                      (g_TextureAtlasEntries[local_14].original_filename,filename);
+    if (iVar1 == 0) break;
+    local_14 = local_14 + 1;
+  }
+  return local_14;
+}

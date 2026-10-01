@@ -1,0 +1,50 @@
+// Name: core_charactr.cpp_CCharacter_attractActorToward_FUN_0042c010
+// Address: 0042c010
+// Address Range: [[0042c010, 0042c10e]]
+// Convention: __cdecl
+// Signature: int __cdecl core_charactr_cpp_CCharacter_attractActorToward_FUN_0042c010(CCharacter *this_ptr,CDemonActor *actor,CVector3f *target_local_point)
+
+#include "nocturne.h"
+
+int __cdecl core_charactr_cpp_CCharacter_attractActorToward_FUN_0042c010(CCharacter *this_ptr,CDemonActor *actor,CVector3f *target_local_point)
+
+{
+  float fVar1;
+  float fVar2;
+  int iVar1;
+  CVector3f *pCVar2;
+  CVector3f local_44;
+  CVector3f local_38;
+  float local_2c;
+  float local_28;
+  float local_24;
+  CVector3f local_20;
+  float local_14;
+  float local_10;
+  float local_c;
+  
+  if ((actor != (CDemonActor *)0x0) &&
+     (iVar1 = (*(((this_ptr->base).vtable._uc)->_uc).canBeAttracted)(this_ptr,&local_20), iVar1 != 0
+     )) {
+    pCVar2 = core_actor_cpp_CDemonActor_localToWorldPoint_FUN_00408ec0
+                       (actor,&local_44,target_local_point);
+    local_2c = local_20.x - pCVar2->x;
+    local_24 = local_20.z - pCVar2->z;
+    local_28 = 0.0;
+    fVar1 = SQRT(local_24 * local_24 + local_2c * local_2c);
+    fVar2 = g_CGamePtr->delta_time_float * (float)5;
+    if (fVar2 < fVar1) {
+      fVar2 = fVar2 / fVar1;
+      local_2c = local_2c * fVar2;
+      local_28 = fVar2 * 0.0;
+      local_24 = local_24 * fVar2;
+    }
+    local_38.x = (actor->location).position.x + local_2c;
+    local_38.y = (actor->location).position.y + local_28;
+    local_38.z = (actor->location).position.z + local_24;
+    (*((actor->vtable)._ub)->setPositionAndOrientation)(actor,&local_38,(CVector3f *)&actor->orient)
+    ;
+    return 1;
+  }
+  return 0;
+}

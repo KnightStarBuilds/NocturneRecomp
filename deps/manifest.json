@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "dependencies": [
+    {
+      "name": "sdl2", "version": "2.30.0",
+      "url": "https://www.libsdl.org/release/SDL2-2.30.0.tar.gz",
+      "archive": "sdl2-2.30.0.tar.gz",
+      "sha256": "36e2e41557e0fa4a1519315c0f5958a87ccb27e25c51776beb6f1239526447b0",
+      "license": "Zlib", "license_files": ["LICENSE.txt"]
+    },
+    {
+      "name": "sdl2_ttf", "version": "2.22.0",
+      "url": "https://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.22.0.tar.gz",
+      "archive": "sdl2_ttf-2.22.0.tar.gz",
+      "sha256": "d48cbd1ce475b9e178206bf3b72d56b66d84d44f64ac05803328396234d67723",
+      "vendored": {"FreeType": "2.13.2", "HarfBuzz": "8.1.1 (disabled by default)"},
+      "license": "Zlib; release includes FreeType (FTL/GPL dual license, selected FTL) and HarfBuzz (MIT-like). All vendored sources are covered by the archive hash.",
+      "license_files": ["LICENSE.txt", "external/freetype/docs/FTL.TXT", "external/harfbuzz/COPYING"]
+    },
+    {
+      "name": "ffmpeg", "version": "6.1.1",
+      "url": "https://ffmpeg.org/releases/ffmpeg-6.1.1.tar.xz",
+      "archive": "ffmpeg-6.1.1.tar.xz",
+      "sha256": "8684f4b00f94b85461884c3719382f1261f0d9eb3d59640a1f4ac0873616f968",
+      "license": "LGPL-2.1-or-later; GPL and nonfree components disabled. Static linking requires relinkable object files when distributing binaries.",
+      "license_files": ["COPYING.LGPLv2.1", "LICENSE.md"]
+    },
+    {
+      "name": "liberation-fonts", "version": "2.1.5",
+      "url": "https://github.com/liberationfonts/liberation-fonts/files/7261482/liberation-fonts-ttf-2.1.5.tar.gz",
+      "archive": "liberation-fonts-2.1.5.tar.gz",
+      "sha256": "7191c669bf38899f73a2094ed00f7b800553364f90e2637010a69c0e268f25d0",
+      "license": "SIL Open Font License 1.1", "license_files": ["LICENSE", "AUTHORS"]
+    }
+  ]
+}

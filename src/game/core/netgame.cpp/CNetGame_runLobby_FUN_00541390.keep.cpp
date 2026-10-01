@@ -1,0 +1,327 @@
+// Name: core_netgame.cpp_CNetGame_runLobby_FUN_00541390
+// Address: 00541390
+// MANUAL RECONSTRUCTION
+// Address Range: [[00541390, 00541c77]]
+// Convention: __cdecl
+// Signature: int __cdecl core_netgame_cpp_CNetGame_runLobby_FUN_00541390(CNetGame *this_ptr)
+
+#include "nocturne.h"
+#include "core/debug_log.h"
+
+int __cdecl core_netgame_cpp_CNetGame_runLobby_FUN_00541390(CNetGame *this_ptr)
+
+{
+  char *mission_filename;
+  uint uVar3;
+  int iVar5;
+  int iVar4;
+  int iVar6;
+  char *pcVar7;
+  int iVar7;
+  char *pcVar10;
+  float local_138;
+  float local_134;
+  char local_130 [256];
+  char *local_28;
+  int local_24;
+  int local_20;
+  bool bVar2;
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+  SNetPlayer *local_player;
+  int hero_cycle_dir;
+  int host_hero_view;
+  int saved_input_key_mask;
+#endif
+
+  iVar5 = g_ForceMessagePump;
+  if (this_ptr->connection_type != CONNECTION_NONE) {
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+    nocturne_net_hero_forget_host_view();
+    nocturne_net_cheats_reset();
+    nocturne_net_input_reset();
+    saved_input_key_mask = g_InputKeyMask;
+    engine_keys_cpp_CKeys_toggleInputMask_FUN_005024b0(g_CKeysPtr,1);
+#endif
+    this_ptr->players[this_ptr->local_player_index].local_sync_stage = 1;
+    this_ptr->players[this_ptr->local_player_index].ready_flag = 0;
+    g_ForceMessagePump = 0;
+    this_ptr->network_mode = NET_MODE_LOBBY;
+    if (this_ptr->connection_type == CONNECTION_HOST) {
+#if NOCTURNE_AUTHENTIC_RNG
+      uVar3 = rand();
+#else
+      uVar3 = nocturne_rng_seed();
+#endif
+      this_ptr->random_seed = uVar3;
+      core_netgame_cpp_CNetGame_gameSettingsChanged_FUN_00542cf0(this_ptr);
+    }
+    else {
+      core_netgame_cpp_CNetGame_sendMyStateChanged_FUN_00542ff0(this_ptr);
+    }
+    mission_filename = this_ptr->mission_name;
+    while (this_ptr->connection_type != CONNECTION_NONE) {
+      engine_special_cpp_clearScreen_FUN_005b3e70();
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+      engine_2d_c_drawText_FUN_00401fd0
+                ("ENTER toggle ready    S send chat    ESC leave lobby",0,0);
+      engine_2d_c_drawText_FUN_00401fd0("Starts when all players ready",400,0);
+      if (this_ptr->connection_type == CONNECTION_CLIENT) {
+        engine_2d_c_drawText_FUN_00401fd0("LEFT/RIGHT change hero",0,0x16);
+      }
+#endif
+      _sprintf(local_130,"Mission: %s",mission_filename);
+      engine_2d_c_drawText_FUN_00401fd0(local_130,0,0xb);
+      _sprintf(local_130,"MyGameSettigsId: %d",INT_02f7c8c4);
+      engine_2d_c_drawText_FUN_00401fd0(local_130,400,0xb);
+      engine_2d_c_drawText_FUN_00401fd0("Player",0,0x21);
+      engine_2d_c_drawText_FUN_00401fd0("IP",100,0x21);
+      engine_2d_c_drawText_FUN_00401fd0("Ping",200,0x21);
+      engine_2d_c_drawText_FUN_00401fd0("Ready",300,0x21);
+      engine_2d_c_drawText_FUN_00401fd0("heroType",400,0x21);
+      engine_2d_c_drawText_FUN_00401fd0("gameSettings",500,0x21);
+      g_ActiveRenderColor = 0xff;
+      engine_2d_c_drawHLine_FUN_00402ee0(0,0x31,g_WindowWidth + -1);
+      iVar4 = 0x37;
+      local_24 = 0;
+      for (local_20 = 0; local_20 < g_CNetGamePtr->player_count; local_20 = local_20 + 1) {
+        SNetPlayer *player = (SNetPlayer *)((char *)g_CNetGamePtr->players + local_24);
+        engine_2d_c_drawText_FUN_00401fd0(player->name,0,iVar4);
+        if (player->addr.ip_address == *(uint *)g_AnyAddressIP) {
+          strcpy(local_130, "(Local)");
+        }
+        else {
+          support_trisock_cpp_formatIPAddress_FUN_005e17c0
+                    ((char *)&player->addr,(uchar *)local_130);
+        }
+        engine_2d_c_drawText_FUN_00401fd0(local_130,100,iVar4);
+        if (local_20 == g_CNetGamePtr->local_player_index) {
+          pcVar7 = "(Local)";
+LAB_005415cb:
+          strcpy(local_130, pcVar7);
+        }
+        else {
+          if (player->ping_quality < 0.0) {
+            pcVar7 = "?";
+            goto LAB_005415cb;
+          }
+          _sprintf
+                    (local_130,"%dms",
+                     (int)ROUND(ROUND(player->ping_quality * 1000.0f)));
+        }
+        engine_2d_c_drawText_FUN_00401fd0(local_130,200,iVar4);
+        if (player->ready_flag == 0) {
+          pcVar7 = "Not ready";
+        }
+        else {
+          pcVar7 = "Ready";
+        }
+        strcpy(local_130, pcVar7);
+        engine_2d_c_drawText_FUN_00401fd0(local_130,300,iVar4);
+#if NOCTURNE_AUTHENTIC_NETPLAY
+        _sprintf(local_130,"%d",player->hero_number);
+#else
+        strcpy(local_130, nocturne_net_hero_name(player->hero_number));
+#endif
+        engine_2d_c_drawText_FUN_00401fd0(local_130,400,iVar4);
+        if (this_ptr->connection_type == CONNECTION_HOST) {
+          _sprintf(local_130,"%d",player->player_id);
+          engine_2d_c_drawText_FUN_00401fd0(local_130,500,iVar4);
+        }
+        iVar4 = iVar4 + 0xb;
+        local_24 = local_24 + sizeof(SNetPlayer);
+      }
+      iVar6 = iVar4 + 0x2c;
+      iVar7 = (g_ChatHistoryCount - (g_WindowHeight - iVar6) / 0xb) + 1;
+      if (iVar7 < 0) {
+        iVar7 = 0;
+      }
+      local_28 = g_ChatHistory[iVar7].message;
+      pcVar10 = g_ChatHistory[iVar7].sender_name;
+      for (; iVar7 < g_ChatHistoryCount; iVar7 = iVar7 + 1) {
+        engine_2d_c_drawText_FUN_00401fd0(pcVar10,0,iVar6);
+        engine_2d_c_drawText_FUN_00401fd0(local_28,100,iVar6);
+        pcVar10 = pcVar10 + 0x120;
+        local_28 = local_28 + 0x120;
+        iVar6 = iVar6 + 0xb;
+      }
+      wincore_wddvmem_cpp_swapBuffers_FUN_005eda20();
+      core_netgame_cpp_CNetGame_receivePackets_FUN_005405b0(this_ptr);
+      iVar6 = 0;
+      if (0 < this_ptr->player_count) {
+        do {
+          this_ptr->players[iVar6].sim_frame_index = 0;
+          iVar6 = iVar6 + 1;
+        } while (iVar6 < this_ptr->player_count);
+      }
+      this_ptr->has_pending_sim_frame = 0;
+      if (this_ptr->connection_type == CONNECTION_HOST) {
+        this_ptr->players[this_ptr->local_player_index].player_id = INT_02f7c8c4;
+        iVar6 = 0;
+        bVar2 = true;
+        if (0 < this_ptr->player_count) {
+          do {
+            if (this_ptr->players[iVar6].ready_flag == 0) {
+              bVar2 = false;
+            }
+            if (INT_02f7c8c4 != this_ptr->players[iVar6].player_id) {
+              local_138 = (float)(int)(g_CurrentGameTime - this_ptr->players[iVar6].last_update_time) *
+                          (float)1.52587890625e-05;
+              if (local_138 < 0.0) {
+                local_138 = 0.0;
+              }
+              if ((float)30 < local_138) {
+                local_138 = 30.0;
+              }
+              if ((float)0.20000000000000001 < local_138) {
+                core_netgame_cpp_CNetGame_sendGameSetting_FUN_00542dd0(this_ptr,iVar6);
+              }
+              bVar2 = false;
+            }
+            iVar6 = iVar6 + 1;
+          } while (iVar6 < this_ptr->player_count);
+        }
+        if ((bVar2) && (1 < this_ptr->player_count)) {
+          this_ptr->network_mode = NET_MODE_SYNCING;
+          engine_2d_c_clearInputAndWait_FUN_00403260();
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+          nocturne_net_cheats_announce();
+#endif
+          iVar6 = core_netgame_cpp_CNetGame_syncPlayers_FUN_005401e0(this_ptr,1);
+          if (iVar6 != 0) {
+            shape_edittool_cpp_CEditorTools_displayCenteredStatusMessage_FUN_0049e790
+                      (g_CEditorToolsPtr,"Loading %s",mission_filename);
+            srand(this_ptr->random_seed);
+            core_actor_cpp_setRandomSeed_FUN_0040cb90(this_ptr->random_seed);
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+#if NOCTURNE_NETPLAY_RNG_TRACE
+            DLOG("netplay", "LOAD SEED (host) random_seed=%u (0x%06x masked)",
+                    this_ptr->random_seed, this_ptr->random_seed & 0xffffff);
+#endif
+#endif
+            core_mission_cpp_CDemonMission_load_FUN_00522d90(g_CDemonMissionPtr,mission_filename,0);
+            iVar6 = core_mission_cpp_CDemonMission_createHeros_FUN_00524a80
+                              (g_CDemonMissionPtr,(CCharacter *)0x0);
+            if (iVar6 != 0) {
+              core_mission_cpp_CDemonMission_startMission_FUN_00524760(g_CDemonMissionPtr);
+              iVar6 = core_netgame_cpp_CNetGame_syncPlayers_FUN_005401e0(this_ptr,2);
+              if (iVar6 != 0) {
+                return 1;
+              }
+            }
+          }
+          this_ptr->network_mode = NET_MODE_LOBBY;
+        }
+      }
+      if ((this_ptr->connection_type == CONNECTION_CLIENT) &&
+         (this_ptr->network_mode == NET_MODE_SYNCING)) {
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+        host_hero_view = nocturne_net_hero_host_view();
+        if (-1 < host_hero_view) {
+          this_ptr->players[this_ptr->local_player_index].hero_number = host_hero_view;
+        }
+#endif
+        shape_edittool_cpp_CEditorTools_displayCenteredStatusMessage_FUN_0049e790
+                  (g_CEditorToolsPtr,"Loading %s",this_ptr->mission_name);
+        srand(this_ptr->random_seed);
+        core_actor_cpp_setRandomSeed_FUN_0040cb90(this_ptr->random_seed);
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+#if NOCTURNE_NETPLAY_RNG_TRACE
+        DLOG("netplay", "LOAD SEED (guest) random_seed=%u (0x%06x masked)",
+                this_ptr->random_seed, this_ptr->random_seed & 0xffffff);
+#endif
+#endif
+        core_mission_cpp_CDemonMission_load_FUN_00522d90
+                  (g_CDemonMissionPtr,this_ptr->mission_name,0);
+        iVar6 = core_mission_cpp_CDemonMission_createHeros_FUN_00524a80
+                          (g_CDemonMissionPtr,(CCharacter *)0x0);
+        if (iVar6 != 0) {
+          core_mission_cpp_CDemonMission_startMission_FUN_00524760(g_CDemonMissionPtr);
+          iVar6 = core_netgame_cpp_CNetGame_syncPlayers_FUN_005401e0(this_ptr,2);
+          if (iVar6 != 0) {
+            iVar5 = wincore_winrun_cpp_getTime_FUN_005f2dc0();
+            iVar6 = iVar5 / 0x12 - g_LastPingTime;
+            g_LastPingTime = iVar5 / 0x12;
+            if (iVar6 < 0) {
+              iVar6 = 0;
+            }
+            else if (0x20000 < iVar6) {
+              iVar6 = 0x20000;
+            }
+            g_CurrentGameTime = g_CurrentGameTime + iVar6;
+            UINT_02f7c8c8 = g_CurrentGameTime - 0x1e0000;
+            return 1;
+          }
+        }
+        this_ptr->network_mode = NET_MODE_LOBBY;
+        goto LAB_005416d1;
+      }
+      if ((this_ptr->connection_type == CONNECTION_CLIENT) && (INT_00680a04 != 0)) {
+        local_134 = (float)(int)(g_CurrentGameTime -
+                                this_ptr->players[this_ptr->local_player_index].state_change_time) *
+                    (float)1.52587890625e-05;
+        if (local_134 < 0.0) {
+          local_134 = 0.0;
+        }
+        if ((float)30 < local_134) {
+          local_134 = 30.0;
+        }
+        if ((float)0.20000000000000001 < local_134) {
+          core_netgame_cpp_CNetGame_sendMyStateChanged_FUN_00542ff0(this_ptr);
+        }
+      }
+      iVar6 = (*g_CKeysPtr->vtable->getAndClearKeyState)(g_CKeysPtr,DIK_ESCAPE);
+      if (iVar6 != 0) goto LAB_005416d1;
+      iVar6 = (*g_CKeysPtr->vtable->getAndClearKeyState)(g_CKeysPtr,DIK_RETURN);
+      if (iVar6 != 0) {
+        this_ptr->players[this_ptr->local_player_index].ready_flag =
+             (uint)(this_ptr->players[this_ptr->local_player_index].ready_flag == 0);
+        if (this_ptr->connection_type == CONNECTION_HOST) {
+          core_netgame_cpp_CNetGame_gameSettingsChanged_FUN_00542cf0(this_ptr);
+        }
+        else {
+          core_netgame_cpp_CNetGame_sendMyStateChanged_FUN_00542ff0(this_ptr);
+        }
+      }
+      iVar6 = (*g_CKeysPtr->vtable->getAndClearKeyState)(g_CKeysPtr,DIK_S);
+      if ((iVar6 != 0) &&
+         (iVar6 = shape_edittool_cpp_CEditorTools_showTextInputDialog_FUN_004a03d0
+                            (g_CEditorToolsPtr,"Send chat",g_ChatMessageBuffer,0x100,1),
+         iVar6 != 0)) {
+        core_netgame_cpp_CNetGame_processChatOut_FUN_00541e40(this_ptr,g_ChatMessageBuffer,-1);
+      }
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+      if (this_ptr->connection_type == CONNECTION_CLIENT) {
+        hero_cycle_dir = 0;
+        iVar6 = (*g_CKeysPtr->vtable->getAndClearKeyState)(g_CKeysPtr,DIK_RIGHT);
+        if (iVar6 != 0) {
+          hero_cycle_dir = 1;
+        }
+        iVar6 = (*g_CKeysPtr->vtable->getAndClearKeyState)(g_CKeysPtr,DIK_LEFT);
+        if (iVar6 != 0) {
+          hero_cycle_dir = -1;
+        }
+        if (hero_cycle_dir != 0) {
+          local_player = this_ptr->players + this_ptr->local_player_index;
+          local_player->hero_number =
+               nocturne_net_hero_cycle(local_player->hero_number,hero_cycle_dir);
+          core_netgame_cpp_CNetGame_sendMyStateChanged_FUN_00542ff0(this_ptr);
+        }
+      }
+#endif
+      for (iVar6 = 0; iVar6 < g_CNetGamePtr->player_count; iVar6 = iVar6 + 1) {
+        core_netgame_cpp_CNetGame_updatePing_FUN_00541c80(this_ptr,iVar6,2.0);
+      }
+    }
+    shape_edittool_cpp_CEditorTools_showMessage_FUN_0049e6a0
+              (g_CEditorToolsPtr,"You have been disconnected from the game.");
+LAB_005416d1:
+    engine_2d_c_clearInputAndWait_FUN_00403260();
+    core_netgame_cpp_CNetGame_disconnect_FUN_0053fd00(this_ptr,1);
+    engine_2d_c_clearInputAndWait_FUN_00403260();
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+    g_InputKeyMask = saved_input_key_mask;
+#endif
+  }
+  g_ForceMessagePump = iVar5;
+  return 0;
+}

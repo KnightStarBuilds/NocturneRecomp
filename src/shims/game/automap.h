@@ -1,0 +1,258 @@
+#pragma once
+
+// =============================================================================
+// AUTOMAP — a Doom-style line map that fills in as the player walks
+// =============================================================================
+//
+// Neither shipped binary had a map. Gated by NOCTURNE_AUTHENTIC_AUTOMAP; every
+// entry point below is a no-op when that is 1, so the call sites need no #if of
+// their own beyond the one that draws.
+//
+// The design, the measured numbers behind it, and the extraction rules that
+// look right and are not, are in research/19-automap/README.md. The short
+// version, because getting any of these wrong produces a map that looks
+// plausible and lies:
+//
+//   * Geometry is CDemonRaytrace::cube_data, NOT cube_list (the .GEO import
+//     path, null at runtime) and NOT the flat triangle_list (build/save only).
+//     A triangle holds POINTERS into its own cube's vertex buffer, and is
+//     duplicated into every cube it straddles.
+//
+//   * Walls are dominant_axis != 1. Free, and accurate.
+//
+//   * The height filter bands EDGES by their own height. Banding whole
+//     triangles fails in both directions: by overlap it drags whole storeys in
+//     through stair shafts and draws phantom rooms inside the room you are
+//     standing in; by centre it deletes the cliff you are standing on top of,
+//     whose centre is far below your feet.
+//
+//   * The band is asymmetric and one storey tall, because the player's position
+//     is at his feet.
+//
+//   * Reveal is per 3D cell. Two dimensions would let a tower walked at the top
+//     uncover the hall beneath it.
+//
+//   * The band is the player's own floor and nothing moves it. The storeys
+//     outside it draw underneath at an adjustable brightness, held at half, so
+//     another floor is reached by bringing it up rather than by moving the
+//     band onto it. They keep to the fog like everything else, so this is
+//     context rather than an x-ray. At zero the map is the one storey it was
+//     designed around; at one the whole explored level reads at once.
+//
+//   * The marker key replaces the heading rather than sitting beside it, and
+//     its swatches go through the same draw_marker the map uses, so a key entry
+//     stays consistent with the marker it explains.
+//
+//   * Wall lines are coloured by material, from CDemonCube::ground_type_memory
+//     -- a uchar[triangle_count] holding one EGroundType per triangle. Colour
+//     the LINES, not the cells beneath them: a fill reads as a second layer to
+//     look through rather than as information about the drawing.
+//
+//   * Doors follow the fog, characters follow line of sight. A door that has
+//     been seen is a fact about the level and is worth remembering, and its
+//     colour says whether the player can currently get through it. A character
+//     moves, so remembering where one was seen would draw an x-ray of the
+//     level's population rather than a map.
+//
+//   * A door has two locks. allowed_sides refuses the player from the wrong
+//     side and is the commoner one; key_mask is checked only after that passes.
+//     Colouring by key_mask alone leaves most locked doors reading as open.
+//
+//   * A sight ray must stop SHORT of the character it is asking about.
+//     testLineOcclusion raycasts against every actor, so a ray ending on a
+//     character is occluded by that character and nothing ever draws.
+//
+//   * Hero is a CLASS, not the party: CMoloch, CHaystack and the rest derive
+//     from CHero and are placed in levels as ordinary actors. Skipping the
+//     class in the actor-list pass loses all of them. g_HeroActors is swept
+//     afterwards only to top up party slots the list missed, since it is
+//     filtered by location.area_id and is not guaranteed to hold them.
+//
+//   * Colour alone does not separate a hero from a character at map scale.
+//     Heroes carry a halo ring as well, and the three marker sizes are chosen
+//     to keep the player the most prominent thing on his own map.
+//
+//   * Colour and shape per class come from one table, k_markers, and the lookup
+//     walks the ACTOR's own CDemonActorType::parent_type chain -- so a derived
+//     class always beats its base and the table's order does not matter.
+//     Hostility is CEnemy, a class in its own right, so it is the engine's own
+//     classification rather than a name list maintained here. Enemies take a
+//     distinct hue rather than another red: the player marker and a locked door
+//     are red already, and pick_color can collapse a third red onto them at
+//     8bpp.
+//
+//   * CBodyPart::canPickup returns Carry, the same value a rifle gives, so only
+//     the class row keeps a body part from drawing as equipment.
+//
+//   * The heading uses the level's own title from the binary --
+//     CGame::showChapterSelect's chapter lists, keyed by g_ChapterMissionFiles.
+//     NOT g_ChapterDisplayName: that holds the volume title and is written only
+//     on the chapter-select path, so a loaded save would show the wrong act.
+//     See nocturne_chapter_environment_name.
+//
+// Input is one bindable action, which reaches keyboard and gamepad at once: the
+// pad shim writes its codes into the same g_KeyboardState the keyboard uses, so
+// a binding is just a code and does not care which device produced it. Once the
+// map is up it takes the controls outright -- left stick pans, the bumpers
+// zoom, the triggers bring the other floors up and down, the left stick's
+// button recentres on the hero, Guide shows the marker key, and the hero stands
+// still -- because it is a screen rather than an overlay. The left stick and the triggers are read as analogue
+// through nocturne_gamepad_axes; the corresponding bindings do the same job for
+// a keyboard.
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+// ---- lifecycle --------------------------------------------------------------
+
+// Rebuild from the raytrace grid. Call after a set's geometry is resident;
+// clears the reveal, since a new level's cells mean nothing to the old one.
+void nocturne_automap_reset(void);
+
+// Once per frame, before rendering: reveals cells around the player, tracks the
+// completion percentage, and services the map's own input while it is open.
+void nocturne_automap_update(void);
+
+// Non-zero while the map is on screen.
+int nocturne_automap_active(void);
+
+// Non-zero while the map has the movement controls, which is whenever it is
+// open. The map is a screen of its own rather than an overlay: it paints out
+// the frame, the hero does not move, and the sticks drive the map instead.
+int nocturne_automap_owns_controls(void);
+
+// Offer the map a cancel press (Escape, or whatever else means "back"). Returns
+// non-zero when the map took it, which it does whenever it is open -- closing
+// itself and leaving the press consumed.
+//
+// The point is that the two screens are exclusive. Without this, Escape reaches
+// the in-mission menu while the map is up and the pick list is built on top of
+// the map, and the map would only notice on the next frame through the
+// g_ModalDialogActive test in nocturne_automap_update. One press should mean
+// one screen: the map closes, and a second press opens the menu.
+int nocturne_automap_handle_cancel(void);
+
+// Non-zero while the world should not advance -- the "pause" half of being a
+// separate screen. NOT simply the same as being open: in a network game the
+// simulation is lockstep and every machine must keep stepping, so one player
+// reading his map cannot be allowed to stop it. The policy lives here so the
+// call site is a single test.
+int nocturne_automap_freezes_world(void);
+
+// Clear the per-frame effect scratch that CGame::process would have cleared.
+// Call it on the frames the freeze above skips that call.
+//
+// CDemonSet::renderScene runs whether the world advances or not, and the laser
+// tracers it emits are appended to a fixed pool by CFireEffect::createLaser*.
+// Nothing consumes that pool -- its only reset is the first line of
+// CFireEffect::process, which the freeze skips -- so a laser in view stacks one
+// more copy of itself on the same path every frame until it hits the 64-entry
+// cap. They are drawn additively, so the frame the map closes on renders the
+// whole stack at once and the beam flashes.
+void nocturne_automap_clear_frame_effects(void);
+
+// Draw. Only meaningful when nocturne_automap_active(); costs nothing otherwise.
+void nocturne_automap_render(void);
+
+// ---- input ------------------------------------------------------------------
+
+// The input code bound to opening the map, and its storage. Exposed as a
+// pointer because the Customize Keys screen collects bindings as int* into
+// g_CustomKeyPointers, and this one lives here rather than in CGame so that
+// adding it needs no change to a Ghidra-generated struct.
+int *nocturne_automap_key_binding(void);
+
+// The name the Customize Keys screen shows for it, already localized. Not
+// const: the engine's string type is plain char *, and the binding table copies
+// straight out of it.
+char *nocturne_automap_key_label(void);
+
+// Seed the map binding with its keyboard default, so Restore Defaults reaches
+// it like every other action. It has to be asked for separately because the
+// binding lives here rather than in the contiguous key_walk..key_next_ammo run
+// inside CGame that the generic default and reseed paths iterate; without this
+// the map is the one action Restore Defaults leaves on the previous device's
+// code.
+//
+// Called alongside CGame's own keyboard defaults. A pad overrides it afterwards
+// through nocturne_automap_key_binding(), the same order CGame's fields are
+// written in, and keeps the pad code in the pad shim where the rest of them are.
+void nocturne_automap_apply_default_binding(void);
+
+// Opening the map is the ONLY binding the map adds. Everything else borrows a
+// binding the player already has, and the map screen prints which -- a control
+// he already knows, relabelled for the duration, beats a set of entries in
+// Customize Keys that only mean anything on one screen. It also keeps the
+// binding table from overflowing: g_CustomKeyNames is [30][40] and
+// configureCustomKeyBindings refuses a 31st, so the map has exactly one row to
+// spend.
+//
+//   pan     key_walk / key_backup, key_strafe_left / key_strafe_right
+//   zoom    key_next_weapon / key_prev_weapon
+//   floors  key_fire / key_draw
+//   centre  key_run
+//   legend  key_item_desc
+//
+// Chosen for what those bindings are on a pad: the left stick is walk/backup
+// and strafe, the bumpers cycle weapons, the triggers are fire and draw, the
+// left stick's button is run, and Guide is item description. So the two halves
+// of the left stick pan, the bumpers zoom, the triggers sweep the other floors
+// between unlit and full, the stick button recentres on the hero, and Guide --
+// already "describe what I am looking at" -- shows the marker key.
+//
+// Zoom is a button pair because a scale is held once set, and holding one on a
+// stick means holding the stick. The other-floor brightness is the one setting
+// an axis does suit, since it is a level to be dialled in rather than a
+// position to be held, and the triggers report it analogue.
+//
+// The d-pad and both right-stick axes are read nowhere on this screen:
+// key_next_ammo, key_weapon_5, key_left / key_right and key_point_up /
+// key_point_down are all unused here.
+
+// The player's preferred zoom, as a percentage, for the ini to carry between
+// sessions. The map opens centred on the player but at whatever this holds:
+// where he is, is the question he is asking; how far out he likes to see is a
+// preference and should survive.
+int *nocturne_automap_zoom_setting(void);
+
+// ---- persistence ------------------------------------------------------------
+//
+// Written as a trailing block, after the save's last section. A reader that
+// does not know about it never reaches it: parsing in CGame::loadGame is
+// sequential and bounded, the final section (Game stats) is one fixed-length
+// line, and the version gate is a minimum with no upper bound. So no version
+// bump is needed and older builds load new saves unharmed.
+
+// The engine's stream type, not libc's. _fopen hands back a Watcom-shaped
+// wrapper with the real libc FILE* buried in its _link field, so a _FILE* is
+// NOT a FILE* and must go through the _f* shims (or _FILE_to_FILE) rather than
+// straight into std::fprintf. Declared here rather than taking void*: the point
+// of naming the type is that passing the wrong stream stops compiling.
+struct _FILE;
+
+// Append the current level's reveal. Safe to call with no map data.
+void nocturne_automap_save(struct _FILE *file);
+
+// Stage a trailing block if one is present. EOF means "no map data", which is
+// also what a save written before this feature looks like. Nothing is applied
+// here: CGame::loadGame closes the save before CDemonMission::run builds the
+// level, so at this point the grid still belongs to the level being left.
+void nocturne_automap_load(struct _FILE *file);
+
+// Apply what nocturne_automap_load staged, once the level exists. Call it after
+// CDemonMission::run. Always clears to unexplored first, so a pre-Automap save,
+// a save from another level and a missing block all land on "not walked yet"
+// rather than inheriting whatever the previous level left in memory.
+void nocturne_automap_apply_loaded(void);
+
+// ---- state ------------------------------------------------------------------
+
+// Explored fraction of the level, 0..100, measured against cubes that hold
+// geometry rather than all cubes -- most of a grid is empty air, and a
+// percentage against it would never move.
+int nocturne_automap_explored_percent(void);
+
+#ifdef __cplusplus
+}
+#endif

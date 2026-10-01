@@ -1,0 +1,74 @@
+// Name: core_skeleton.cpp_CDeformableModelInstance_computeCylindricalUVs_FUN_005a1800
+// Address: 005a1800
+// MANUAL RECONSTRUCTION
+// Address Range: [[005a1800, 005a194d]]
+// Convention: __cdecl
+// Signature: void __cdecl core_skeleton_cpp_CDeformableModelInstance_computeCylindricalUVs_FUN_005a1800(CDeformableModelInstance *this_ptr,int u_offset,int v_offset)
+
+#include "nocturne.h"
+
+void __cdecl core_skeleton_cpp_CDeformableModelInstance_computeCylindricalUVs_FUN_005a1800(CDeformableModelInstance *this_ptr,int u_offset,int v_offset)
+
+{
+  CDeformableModel *pCVar3;
+  SRenderVertex *pSVar4;
+  int iVar2;
+  int iVar8;
+  int iVar9;
+  int iVar10;
+  int iVar3;
+  float10 fVar11;
+  CVector3i *pCVar2;
+  int iVar1;
+  
+  if (this_ptr->cached_skinned_lod_index < 0) {
+    g_CurrentFilename = "..\\core\\skeleton.cpp";
+    g_CurrentLineNumber = 4007;
+    core_main_c_displayErrorAndQuit_FUN_00506f10("CDeformableModelInstance::computeCylindricalUVs - points not generated");
+  }
+  pCVar3 = core_skeleton_cpp_CDeformableModelInstance_getModelPtr_FUN_005a07a0(this_ptr);
+  iVar1 = pCVar3->vertex_count[this_ptr->cached_skinned_lod_index];
+  pCVar2 = this_ptr->skinned_vertices_buffer;
+  iVar10 = 1;
+  iVar8 = pCVar2->y;
+  iVar9 = iVar8;
+  iVar3 = iVar8;
+  if (1 < iVar1) {
+    do {
+      iVar2 = pCVar2[1].y;
+      iVar9 = iVar2;
+      if ((iVar3 <= iVar2) && (iVar9 = iVar3, iVar8 < iVar2)) {
+        iVar8 = iVar2;
+      }
+      iVar10 = iVar10 + 1;
+      iVar3 = iVar9;
+      pCVar2 = pCVar2 + 1;
+    } while (iVar10 < iVar1);
+  }
+  iVar8 = iVar8 - iVar9;
+  if (iVar8 < 1) {
+    iVar8 = 1;
+  }
+  if (0 < iVar1) {
+    iVar3 = 0;
+    do {
+      pCVar2 = &this_ptr->skinned_vertices_buffer[iVar3];
+      pSVar4 = &g_CDemonRendererPtr2->vertex_buffer_ptr[iVar3];
+      if ((pCVar2->x == 0) && (pCVar2->z == 0)) {
+        iVar2 = u_offset;
+      }
+      else {
+        fVar11 = (float10)fpatan((float10)pCVar2->x,(float10)pCVar2->z);
+        iVar2 = u_offset + (int)ROUND(ROUND(fVar11 * (float10)2670176.8577967598));
+      }
+      pSVar4->u = iVar2;
+      pSVar4->v =
+           v_offset +
+           (int)((longlong)
+                 ((((longlong)(pCVar2->y - iVar9) & 0xffffffffffU) >> 8) << 0x20 |
+                 (longlong)(pCVar2->y - iVar9) * 0x1000000 & 0xffffffffU) / (longlong)iVar8);
+      iVar3 = iVar3 + 1;
+    } while (iVar3 < iVar1);
+  }
+  return;
+}

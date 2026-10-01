@@ -1,0 +1,321 @@
+#pragma once
+
+// =============================================================================
+// SHIM CONFIG — build-time toggles for shim/keep behavior
+// =============================================================================
+//
+// This file is the entry point: nocturne.h includes it, and it pulls in every
+// toggle and every shim API declaration that decompiled TUs reach through
+// nocturne.h. Nothing else needs to include it directly, and nothing else does.
+//
+// The toggles themselves live in four files beside this one:
+//
+//   shim_config_authentic.h  every NOCTURNE_AUTHENTIC_* flag, whatever
+//                            subsystem it touches — the fidelity dial board.
+//                            Set them all to 1 for maximum fidelity to
+//                            nocedit.exe.
+//   shim_config_netplay.h    the netplay ini, drop timeout and diagnostics.
+//   shim_config_video.h      window ownership, window mode, resolution and
+//                            window scale.
+//   shim_config_media.h      attract-mode movies.
+//   shim_config_input.h      controller deadzones, thresholds and menu
+//                            auto-repeat.
+//   shim_config_debug.h      the FPU trap and the gdb dump helpers.
+//
+// A flag with an authentic answer is in the first file; a flag that tunes an
+// addition is with its feature. Where that split separates the two halves of
+// one subsystem, each side names the other.
+
+// Numeric magnitude constants used by keep/shim code (kept separate from the
+// behavior toggles below).
+#include "config/shim_constants.h"
+
+// The toggles. Authenticity first: NOCTURNE_AUTHENTIC_NETPLAY and
+// NOCTURNE_AUTHENTIC_RNG gate features whose own config headers follow.
+#include "config/shim_config_authentic.h"
+#include "config/shim_config_netplay.h"
+#include "config/shim_config_video.h"
+#include "config/shim_config_media.h"
+#include "config/shim_config_input.h"
+#include "config/shim_config_debug.h"
+
+// =============================================================================
+// SHIM API DECLARATIONS
+// =============================================================================
+//
+// Reached by decompiled TUs through nocturne.h, which includes this file before
+// system.h and types.h — so everything below must be forward-declaration only.
+
+// Registry queries (nocturne_builtin_dll_available / _next) — declared here so
+// decompiled TUs reach them through nocturne.h like the other shim toggles.
+#include "renderer/builtin_dll.h"
+
+// GL version query (nocturne_gl_version_short) — declared here so the Graphics
+// Options 3D API line can name the shader renderer by the version actually
+// running. Separate from gl_present.h, which names SDL types.
+#include "gl/gl_version.h"
+
+// Audio backend query (nocturne_audio_backend_name) — the same idea one screen
+// over: the Sound Options Device line names the host API SDL opened rather than
+// the DirectSound the shipped enumerator hardcodes.
+#include "core/audio_backend.h"
+
+// The Graphics Options resolution list (nocturne_resolution_*) — one ordered
+// table in place of the shipped selector's hardcoded game_pixy chain.
+#include "game/resolution.h"
+
+// Window mode (nocturne_window_mode_*) — declared here so decompiled TUs
+// reach it through nocturne.h.
+#include "gl/window_mode.h"
+
+// Holding the screen across a video mode change, for a caller that changes mode
+// with the simulation standing still and so has nothing that would draw the
+// picture again. Save copies the frame buffer aside; restore puts it back and
+// pushes it to the target, and declines if the mode is no longer the one it was
+// saved from. No caller today — the pause menu draws the scene again instead,
+// so that the graphics settings it just changed are visible in it.
+//
+// Declared rather than included: renderer/trigl_device.h carries the batch
+// types with it, and no decompiled TU needs those.
+#ifdef __cplusplus
+extern "C" {
+#endif
+int nocturne_trigl_device_save_screen(void);
+int nocturne_trigl_device_restore_screen(void);
+
+// The draws between these carry a reflection direction rather than a position in
+// an image, which only the pass emitting them knows. Reached from
+// CDemonSet::renderEnvMapTriangles and gated there on
+// NOCTURNE_AUTHENTIC_ENVMAP_SHADING. Declared rather than included for the same
+// reason as the pair above: renderer/trigl_gl.h carries the batch and pipeline
+// types with it, and no decompiled TU needs those.
+void nocturne_trigl_envmap_pass_begin(void);
+void nocturne_trigl_envmap_pass_end(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+// Attract-mode session state (nocturne_attract_*) — declared here so decompiled
+// TUs reach it through nocturne.h, same as the registry queries below.
+#include "game/attract.h"
+
+// Console sizing, history and glyphs (nocturne_console_*) — declared here so
+// the engine/console.cpp TUs reach it through nocturne.h. Inert under
+// NOCTURNE_AUTHENTIC_CONSOLE.
+#include "game/console.h"
+
+// The window proc's extension point for messages the shipped one never saw
+// (nocturne_window_message, the mouse wheel) — declared here so the wincore TU
+// reaches it through nocturne.h. Inert under
+// NOCTURNE_AUTHENTIC_WINDOW_MESSAGES.
+#include "win32/window_message.h"
+
+// HUD scaling (nocturne_ui_*) — declared here so the HUD TUs reach it through
+// nocturne.h.
+#include "game/ui_scale.h"
+
+// The level movies play at (nocturne_movie_*), reached from the menu TU for
+// the Sound Options line and from the movie decoder for the gain itself.
+#include "game/movie_audio.h"
+
+// Goggle-camera pitch for the heroes other than CStranger
+// (nocturne_goggle_look_*), reached from the set and game TUs. Inert under
+// NOCTURNE_AUTHENTIC_GOGGLE_LOOK.
+#include "game/goggle_look.h"
+
+// Flashlight, beam, goggles and battery per hero (nocturne_hero_*), reached
+// from the stranger, weapon, inv, set and game TUs. Inert under
+// NOCTURNE_AUTHENTIC_NETPLAY.
+#include "game/hero_light.h"
+
+// One Baron per Baron weapon (nocturne_baron_*), reached from the baron and
+// game TUs. Inert under NOCTURNE_AUTHENTIC_NETPLAY.
+#include "game/hero_baron.h"
+
+// Modern controller support (nocturne_gamepad_*), reached from the game TU's
+// input path and from the menu TU's key-name and validity helpers. The pad
+// input codes it defines are reached the same way. Every entry point is inert
+// when NOCTURNE_AUTHENTIC_GAMEPAD is 1, which leaves the shipped joyGetPos
+// path in charge.
+#include "game/gamepad.h"
+
+// Netplay configuration (nocturne_net_*) — declared here so the netgame TUs
+// reach it through nocturne.h.
+#include "net/net_config.h"
+
+// The main menu's MULTIPLAYER submenu (nocturne_net_menu_*), reached from the
+// main.c menu loop.
+#include "net/net_menu.h"
+
+// Clearing what the sound mixer holds when an actor is deleted
+// (nocturne_actor_delete_unbind_sounds), reached from actor.cpp's deleteActor
+// alongside the hero references it already clears. Both halves are gated by
+// NOCTURNE_AUTHENTIC_ACTOR_DELETE.
+#include "game/actor_delete.h"
+
+// The Options screen's CHEATS submenu (nocturne_cheats_menu) and the mission-
+// start application of whatever it armed (nocturne_cheats_apply), reached from
+// the menu and mission TUs. Both are no-ops under NOCTURNE_AUTHENTIC_CHEAT_MENU.
+#include "game/cheats.h"
+
+// The automap (nocturne_automap_*), reached from the game TU for its per-frame
+// update and draw, from the set TU to rebuild when a level's geometry lands,
+// from the menu TU for its key binding, and from the save/load keeps for the
+// explored state. Every entry point is inert under NOCTURNE_AUTHENTIC_AUTOMAP.
+#include "game/automap.h"
+
+// The forward-step scale for scripted walks (nocturne_walk_turn_scale), reached
+// from CCharacter::walkToPoint and gated there by NOCTURNE_AUTHENTIC_WALK_TURN.
+#include "game/walk_turn.h"
+
+// The pause menu's WARPS entry (nocturne_warps_*): the developer warps the
+// shipped mission scripts already listen for, raised the way RAISE raises them.
+// Reached from CGame::runGameSession, shown only when the Mission warps line in
+// the cheats menu above is on, and gated by the same NOCTURNE_AUTHENTIC_CHEAT_MENU.
+#include "game/warps.h"
+
+// Host-authoritative cheats (nocturne_net_cheats_*), reached from the netgame
+// TU. A lockstep session cannot carry two cheat lists, so the host's stands in
+// for a guest's for the length of it. Inert outside a network game.
+#include "net/net_cheats.h"
+
+// Lobby hero selection (nocturne_net_hero_*), reached the same way from the
+// netgame TU. Unlike the netplay additions below, nothing here is compiled out
+// under NOCTURNE_AUTHENTIC_NETPLAY — the name table and the cycle step are
+// ordinary functions; it is the lobby's call sites that are gated.
+#include "net/net_hero.h"
+
+// The weapon each hero class starts holding (nocturne_hero_default_weapon),
+// reached from CDemonMission::createOneHero — the one place a player hero is
+// built, and the only one whose inventory is not immediately overwritten by
+// CInventory::load. Gated there on NOCTURNE_AUTHENTIC_HERO_WEAPON, not on the
+// netplay flag: the CGun that CHero::ctor hands every class is wrong for that
+// class whoever is driving it, so the correction belongs to the hero rather
+// than to the lobby.
+#include "game/hero_weapon.h"
+
+// The CHero interaction set (nocturne_hero_interact), reached from the two
+// hero classes whose fire button never had it, and breaking out of a grab
+// (nocturne_hero_grab_escape), reached from the eight that never had that.
+// Both are gated at their call sites on NOCTURNE_AUTHENTIC_HERO_ACTIONS, which
+// also covers the sheathed-fire fall-through in the three melee classes — one
+// flag over the whole fire-button and grab surface of the classes the shipped
+// options screen never let anyone play.
+#include "game/hero_interact.h"
+#include "game/hero_grab.h"
+
+// Health-item use, auto-use and the health bar on damage (nocturne_hero_items_*),
+// reached from the process and processDamage of the classes that had none of
+// it. Gated at those call sites on NOCTURNE_AUTHENTIC_HERO_ACTIONS.
+#include "game/hero_items.h"
+
+// Moloch's attacks (nocturne_moloch_*): fire strikes in demon form, draw still
+// morphs. Gated at the CMoloch::process call sites on
+// NOCTURNE_AUTHENTIC_HERO_ACTIONS.
+#include "game/hero_moloch.h"
+
+// Which of the engine's two text paths is used (nocturne_os_font_*), reached
+// from CGame::initFonts to apply the stored choice and from the menu TU for the
+// Graphics Options line. Inert under NOCTURNE_OS_FONT_OPTION=0.
+#include "core/os_font.h"
+
+// The dialog widgets' font (nocturne_menu_font*), chosen on the Graphics
+// Options screen and asked for wherever the game would set g_ThemeFont. Gated
+// at those sites on NOCTURNE_AUTHENTIC_MENU_FONT.
+#include "core/menu_font.h"
+
+// What this build calls itself (nocturne_version*), reached from the entry
+// point for --version and from the game TU for the console banner and the menu
+// corner. Not gated: a build always knows its own version, and only where it is
+// shown on the shipped menu screen is a deviation.
+#include "core/version.h"
+
+// The memory line (nocturne_heap_report), reached from
+// CEditorTools::displayMemoryDiagnostics. Gated there on
+// NOCTURNE_AUTHENTIC_HEAP_REPORT; the shipped _heapwalk cannot see the host's
+// heap, so without this the line only ever says "Heap is empty."
+#include "core/heap_report.h"
+
+// The slot save/load UI (nocturne_save_pick_slot, nocturne_load_pick_slot,
+// nocturne_save_continue_target) and the autosave (nocturne_autosave_poll),
+// reached from the save and load keeps, the main menu TU and the mission loop.
+// The pickers are inert under NOCTURNE_AUTHENTIC_SAVE_SLOTS and the poll under
+// NOCTURNE_AUTHENTIC_AUTOSAVE, which are separate flags.
+#include "game/save_slots.h"
+
+// The retail Volume/Chapter picker (nocturne_chapter_pick_mission), lifted out
+// of CGame::showChapterSelect so the multiplayer host can offer the same choice
+// its START menu does. Reached from the game TU; gated at that call site on
+// NOCTURNE_AUTHENTIC_CHAPTER_SELECT.
+#include "game/chapter_select.h"
+
+// Host-scheduled safe respawn (nocturne_net_respawn_*), the desync detector
+// (nocturne_net_sync_*) and the sim-state trace (nocturne_sim_trace_*) —
+// declared here so the netgame, mission and game TUs reach them through
+// nocturne.h. Every entry point in all three is a no-op when
+// NOCTURNE_AUTHENTIC_NETPLAY is 1.
+#include "net/net_respawn.h"
+#include "net/net_sync.h"
+#include "net/sim_trace.h"
+
+// Mission-to-mission transitions (nocturne_net_mission_*), which the shipped
+// game moves through with no rendezvous and no packet at all. Reached from the
+// mission, game and netgame TUs. Every entry point is inert outside a network
+// game, and when NOCTURNE_AUTHENTIC_NETPLAY is 1.
+#include "net/net_mission.h"
+
+// Socket servicing for screens inside a mission that run their own loop and do
+// not return to CGame::processFrame (nocturne_net_keepalive) — declared here so
+// the game TU reaches it through nocturne.h. A no-op outside a network game.
+#include "net/net_keepalive.h"
+
+// Friendly fire (nocturne_net_friendly_fire_block), reached from each hero's
+// processDamage. Gated there on NOCTURNE_AUTHENTIC_FRIENDLY_FIRE, and inert
+// outside a network game.
+#include "net/net_friendly.h"
+
+// Synchronised weapon/item selection (nocturne_net_weapon_*), reached the same
+// way from CGame::processKeyboardControls and the netgame TU. Outside a network
+// game every entry point applies the selection immediately and locally, exactly
+// as the shipped code did.
+#include "net/net_weapon.h"
+
+// Guest button presses counted rather than pulsed on the wire
+// (nocturne_net_input_*), reached from CGame::playerControls and the netgame
+// TU. Gated at those call sites on NOCTURNE_AUTHENTIC_NETPLAY.
+#include "net/net_input.h"
+
+// Agreed cinematic skip (nocturne_net_skip_*), reached from CGame::processHotkeys
+// and the netgame TU. The shipped skip lives in the full pause menu, which a
+// network game never builds.
+#include "net/net_skip.h"
+
+// The path-map cache rewound at each mission start (nocturne_net_pathcache_*),
+// reached from the mission TU. Inert under NOCTURNE_AUTHENTIC_NETPLAY.
+#include "net/net_pathcache.h"
+
+// Deterministic hero selection for simulation code (nocturne_net_sim_*). Unlike
+// the two above this is NOT gated on NOCTURNE_AUTHENTIC_NETPLAY: it returns the
+// local hero unchanged outside a network game, so the AI call sites can use it
+// unconditionally and single player keeps the shipped behaviour.
+#include "net/net_sim.h"
+
+// The funnel itself (nocturne_rng_*) — declared here so every game TU reaches
+// it through nocturne.h. Every entry point collapses to rand() when
+// NOCTURNE_AUTHENTIC_RNG is 1.
+#include "net/rng.h"
+
+// One saved camera state (g_MirrorCullCameraState) shared by
+// CDemonSet::setupMirrorRendering and CDemonCamera::testVisibility, so a
+// reflected actor's bounding box is tested against the mirror camera rather
+// than through the actor transform its caller pushed. Declares nothing when
+// NOCTURNE_AUTHENTIC_MIRROR_CULL is 1.
+#include "game/mirror_cull.h"
+
+// The other saved camera state (g_MirrorSceneCameraState), shared by
+// CDemonSet::setupMirrorRendering and CDemonSet::restoreCameraAfterMirror, so
+// the scene camera is put back after a reflected pass rather than rebuilt from
+// a field of view sampled while a pushed viewport had reset it. Declares
+// nothing when NOCTURNE_AUTHENTIC_MIRROR_PROJECTION is 1.
+#include "game/mirror_projection.h"

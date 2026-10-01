@@ -1,0 +1,74 @@
+// =============================================================================
+// NOCTURNE CUSTOM ENTRY POINT
+// =============================================================================
+//
+// Replaces the decompiled entry.c / ProcessInitTermHandlers /
+// InitializeWinAppRuntime stack-probe scaffolding. Those functions only
+// exist to set up the Watcom runtime — we don't need any of it when linking
+// against a modern C/C++ runtime.
+//
+// Responsibilities:
+//   1. Initialize the cross-platform Win32 shim function pointers.
+//   2. Synthesize the HINSTANCE/cmdline arguments the decompiled winMain
+//      expects.
+//   3. Hand control to the decompiled winMain and propagate its exit code.
+//
+
+#include "nocturne.h"
+#include "win32/shim_init.h"
+
+#include <cstdio>
+#include <cstring>
+#include <exception>
+#include "runtime_paths.h"
+
+// Entries 0..154 are game static initializers (actor registration, vtable
+// setup, etc.). Entries 155..165 are Watcom CRT init handlers that we skip
+// since we link against a modern C/C++ runtime.
+static void runStaticInitializers(void)
+{
+    for (int i = 0; i < 155; i++) {
+        if (g_InitHandlers[i].func != (RUNTIME_HANDLER_FUNC *)0) {
+            g_InitHandlers[i].func();
+            g_InitHandlers[i].status = 0x02;
+        }
+    }
+}
+
+// --version answers before anything is initialized: a bug report should be able
+// to get the build's identity out of a binary that cannot open a window, load a
+// POD or reach a GL context.
+static int wantsVersion(int argc, char** argv)
+{
+    for (int i = 1; i < argc; i++) {
+        if (argv[i] == nullptr) continue;
+        if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) return 1;
+    }
+    return 0;
+}
+
+int main(int argc, char** argv)
+{
+    if (wantsVersion(argc, argv)) {
+        printf("%s\n", nocturne_version_line());
+        return 0;
+    }
+
+    try {
+        if (!nocturne::prepare_runtime(nocturne::parse_options(argc, argv))) return 0;
+    } catch (const std::exception& error) {
+        fprintf(stderr, "Nocturne: %s\n", error.what());
+        return 2;
+    }
+
+    shims_init_all();
+    runStaticInitializers();
+
+    HINSTANCE hInstance     = (*g_GetModuleHandleAFunc)((LPCSTR)0);
+    HINSTANCE hPrevInstance = (HINSTANCE)0;
+    LPSTR     lpCmdLine     = (LPSTR)(argc > 1 ? argv[1] : "");
+    const int nCmdShow      = 10;  // SW_SHOWDEFAULT, mirroring entry.c
+
+    return wincore_winrun_cpp_winMain_FUN_005f3680(
+        hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+}

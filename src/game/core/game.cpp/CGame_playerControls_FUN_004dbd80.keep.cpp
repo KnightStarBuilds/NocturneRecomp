@@ -1,0 +1,51 @@
+// Name: core_game.cpp_CGame_playerControls_FUN_004dbd80
+// Address: 004dbd80
+// MANUAL RECONSTRUCTION
+// Address Range: [[004dbd80, 004dbe5d]]
+// Convention: __cdecl
+// Signature: void __cdecl core_game_cpp_CGame_playerControls_FUN_004dbd80(CGame *this_ptr)
+
+#include "nocturne.h"
+
+void __cdecl core_game_cpp_CGame_playerControls_FUN_004dbd80(CGame *this_ptr)
+
+{
+  EControlMode EVar1;
+  SPlayerInput *player_control;
+  byte bVar5;
+
+  bVar5 = 0;
+  if (g_ModalDialogActive != 0) {
+    core_game_cpp_CGame_resetInputAndCenterCursor_FUN_004dce70(this_ptr);
+    return;
+  }
+  if ((this_ptr->is_paused == 0) && (this_ptr->hero_controls_blocked == 0)) {
+    player_control = core_netgame_cpp_CNetGame_getMyControls_FUN_005438c0(g_CNetGamePtr);
+    EVar1 = this_ptr->game_control;
+    if (EVar1 == CONTROL_MODE_KEYBOARD) {
+      core_game_cpp_CGame_processKeyboardControls_FUN_004dc3e0(this_ptr,player_control);
+    }
+    else if (EVar1 < CONTROL_MODE_GAMEPAD) {
+      core_game_cpp_CGame_processMouseControls_FUN_004dccc0(this_ptr,player_control);
+    }
+    else if (EVar1 == CONTROL_MODE_GAMEPAD) {
+      core_game_cpp_CGame_processJoystickControls_FUN_004dc230(this_ptr,player_control);
+    }
+    else {
+      g_CurrentFilename = "..\\core\\game.cpp";
+      g_CurrentLineNumber = 1832;
+      core_main_c_displayErrorAndQuit_FUN_00506f10("CGame::playerControls - unknown control type");
+    }
+#if !NOCTURNE_AUTHENTIC_GAMEPAD
+    nocturne_gamepad_note_gameplay_frame();
+#endif
+#if !NOCTURNE_AUTHENTIC_NETPLAY
+    nocturne_net_input_note_local(player_control);
+#endif
+    memcpy(g_PrevKeyboardState,g_KeyboardState,0x258);
+    g_InputResetFlag = g_MouseButtonFlags.dword;
+    g_StoredCameraValue = g_CDemonSetPtr->selected_camera_index;
+    return;
+  }
+  return;
+}

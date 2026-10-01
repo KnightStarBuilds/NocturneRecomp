@@ -1,0 +1,229 @@
+#pragma once
+
+// Dependencies
+#include "system/basetypes.h"
+#include "system/stdio.h"
+#include "types/classes/CActorPropertyList.h"
+#include "types/classes/CBloodParticle.h"
+#include "types/classes/CBloodPool.h"
+#include "types/classes/CBloodSplat.h"
+#include "types/classes/CBoundingBox3D.h"
+#include "types/classes/CDemonActor.h"
+#include "types/classes/CDemonActorType.h"
+#include "types/classes/CFlies.h"
+#include "types/classes/CFootstep.h"
+#include "types/classes/CGame.h"
+#include "types/classes/CGargoyle.h"
+#include "types/classes/CGasMask.h"
+#include "types/classes/CGhoul.h"
+#include "types/classes/CGlass.h"
+#include "types/classes/CGore.h"
+#include "types/classes/CGrave.h"
+#include "types/classes/CGround.h"
+#include "types/classes/CPickList.h"
+#include "types/classes/CVector3f.h"
+#include "types/classes/CVector3i.h"
+#include "types/classes/CVector4i.h"
+#include "types/enums/ECollisionType.h"
+#include "types/enums/EGroundType.h"
+#include "types/structs/SCollisionInfo.h"
+#include "types/structs/SDamageInfo.h"
+#include "types/structs/SLaserInfo.h"
+#include "types/structs/SMRGLHeaderPrimitive.h"
+#include "types/structs/SQuadVertices.h"
+#include "types/unions/UOrientationVector.h"
+
+// =============================================================================
+// FUNCTION PROTOTYPES - Range 0x4E0000
+// =============================================================================
+
+void __cdecl core_game_cpp_CGame_loadAssets_FUN_004e07a0(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_beginFadeIn_FUN_004e0920(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_beginFadeOut_FUN_004e0960(CGame *this_ptr);
+void __cdecl core_game_cpp_calculateIrisFadeCenter_FUN_004e09a0(void);
+void __cdecl core_game_cpp_CGame_updateFadeTransition_FUN_004e09c0(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_renderIrisFade_FUN_004e0aa0(CGame *this_ptr);
+uint __cdecl core_game_cpp_CGame_fadeIn_FUN_004e0b90(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_resetWeaponSwitchTimers_FUN_004e0bb0(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_resetInventoryDisplayTimer_FUN_004e0bd0(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_setStatusDisplay_FUN_004e0bf0(CGame *this_ptr,char *name,float value,float duration);
+void __cdecl core_game_cpp_CGame_saveGame_FUN_004e0cd0(CGame *this_ptr,char *save_filename);
+void __cdecl core_game_cpp_CGame_loadGame_FUN_004e12b0(CGame *this_ptr,char *save_filename,int load_mode);
+void __cdecl core_game_cpp_disableUnavailableChapters_FUN_004e1c30(CPickList *pick_list,int chapter_index);
+void __cdecl core_game_cpp_CGame_showChapterSelect_FUN_004e1cb0(CGame *this_ptr,int select_mode);
+void __cdecl core_game_cpp_CGame_displayBitmap_FUN_004e2890(CGame *this_ptr,char *filename,int width,int height);
+void __cdecl core_game_cpp_CGame_showFullscreenBitmap_FUN_004e2910(CGame *this_ptr);
+void __cdecl core_game_cpp_hostNetworkGame_FUN_004e2f10(void);
+void __cdecl core_game_cpp_joinNetworkGame_FUN_004e2fc0(void);
+void __cdecl core_game_cpp_CGame_slamDT_FUN_004e3080(CGame *this_ptr,float delta_time);
+void __cdecl core_game_cpp_beginProfileTimer_FUN_004e30f0(void);
+void __cdecl core_game_cpp_endProfileTimer_FUN_004e3110(char *timer_name);
+void __cdecl core_game_cpp_CGame_process_FUN_004e3190(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_promptLoadGame_FUN_004e36f0(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_displayActStats_FUN_004e3800(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_finishAct_FUN_004e3b90(CGame *this_ptr);
+void __cdecl core_game_cpp_CGame_rollCredits_FUN_004e4010(CGame *this_ptr);
+void __cdecl core_gargoyle_cpp_staticInit_FUN_004e4470(void);
+CGargoyle * __cdecl core_gargoyle_cpp_factoryFuncGargoyle_FUN_004e44a0(void);
+CDemonActorType * __cdecl core_gargoyle_cpp_CGargoyle_getActorType_FUN_004e44d0(CGargoyle *this_ptr);
+CGargoyle * __cdecl core_gargoyle_cpp_CGargoyle_ctor_FUN_004e44e0(CGargoyle *this_ptr);
+void __cdecl core_gargoyle_cpp_CGargoyle_setup_FUN_004e45e0(CGargoyle *this_ptr);
+int __cdecl core_gargoyle_cpp_CGargoyle_shouldMove_FUN_004e48a0(CGargoyle *this_ptr);
+void __cdecl core_gargoyle_cpp_CGargoyle_process_FUN_004e4a00(CGargoyle *this_ptr,float delta_time);
+int __cdecl core_gargoyle_cpp_CGargoyle_renderOpaque_FUN_004e53f0(CGargoyle *this_ptr);
+void __cdecl core_gargoyle_cpp_CGargoyle_archive_FUN_004e5470(CGargoyle *this_ptr);
+void __cdecl core_gargoyle_cpp_CGargoyle_processDismemberment_FUN_004e5530(CGargoyle *this_ptr,SDamageInfo *damage_info);
+void __cdecl core_gargoyle_cpp_CGargoyle_processDamage_FUN_004e57d0(CGargoyle *this_ptr,SDamageInfo *damage_info);
+int __cdecl core_gargoyle_cpp_CGargoyle_getTargetPoints_FUN_004e5930(CGargoyle *this_ptr,CVector3f *out_points_array);
+ECollisionType __cdecl core_gargoyle_cpp_CGargoyle_getCollisionType_FUN_004e5ad0(CGargoyle *this_ptr,SCollisionInfo *collision_info);
+void __cdecl core_gargoyle_cpp_CGargoyle_getPropertyList_FUN_004e5af0(CGargoyle *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_gargoyle_cpp_CGargoyle_addFilesToExtract_FUN_004e5ba0(CGargoyle *this_ptr,_FILE *file_handle);
+CGargoyle * __cdecl core_gargoyle_cpp_CGargoyle_dtor_FUN_004e5bd0(CGargoyle *this_ptr,uint flags);
+void __cdecl core_gasmask_cpp_staticInit_FUN_004e5c90(void);
+CGasMask * __cdecl core_gasmask_cpp_factoryFuncGasMask_FUN_004e5cc0(void);
+CDemonActorType * __cdecl core_gasmask_cpp_CGasMask_getActorType_FUN_004e5cf0(CGasMask *this_ptr);
+CGasMask * __cdecl core_gasmask_cpp_CGasMask_ctor_FUN_004e5d00(CGasMask *this_ptr);
+void __cdecl core_gasmask_cpp_CGasMask_setup_FUN_004e5d50(CGasMask *this_ptr);
+int __cdecl core_gasmask_cpp_CGasMask_canPickup_FUN_004e5d70(CGasMask *this_ptr,CDemonActor *picker);
+void __cdecl core_gasmask_cpp_CGasMask_process_FUN_004e5d90(CGasMask *this_ptr,float delta_time);
+int __cdecl core_gasmask_cpp_CGasMask_renderOpaque_FUN_004e5da0(CGasMask *this_ptr);
+void __cdecl core_gasmask_cpp_CGasMask_archive_FUN_004e5e20(CGasMask *this_ptr);
+ECollisionType __cdecl core_gasmask_cpp_CGasMask_getCollisionType_FUN_004e5e50(CGasMask *this_ptr,SCollisionInfo *collision_info);
+CBoundingBox3D * __cdecl core_gasmask_cpp_CGasMask_getBoundingBox_FUN_004e5e60(CGasMask *this_ptr,CBoundingBox3D *out_box);
+void __cdecl core_gasmask_cpp_CGasMask_getPropertyList_FUN_004e5eb0(CGasMask *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_gasmask_cpp_CGasMask_addFilesToExtract_FUN_004e5ef0(CGasMask *this_ptr,_FILE *file_handle);
+CGasMask * __cdecl core_gasmask_cpp_CGasMask_dtor_FUN_004e5f40(CGasMask *this_ptr,uint flags);
+void __cdecl core_ghoul_cpp_staticInit_FUN_004e5f90(void);
+CGhoul * __cdecl core_ghoul_cpp_factoryFuncGhoul_FUN_004e5ff0(void);
+CDemonActorType * __cdecl core_ghoul_cpp_CGhoul_getActorType_FUN_004e6020(CGhoul *this_ptr);
+CGhoul * __cdecl core_ghoul_cpp_CGhoul_ctor_FUN_004e6030(CGhoul *this_ptr);
+void __cdecl core_ghoul_cpp_CGhoul_setup_FUN_004e6160(CGhoul *this_ptr);
+void __cdecl core_ghoul_cpp_CGhoul_findDarkWayPoint_FUN_004e63d0(CGhoul *this_ptr,float delta_time);
+void __cdecl core_ghoul_cpp_CGhoul_process_FUN_004e6600(CGhoul *this_ptr,float delta_time);
+void __cdecl core_ghoul_cpp_CGhoul_renderBackground_FUN_004e8190(CGhoul *this_ptr,int layer_flag);
+void __cdecl core_ghoul_cpp_CGhoul_archive_FUN_004e81c0(CGhoul *this_ptr);
+int __cdecl core_ghoul_cpp_CGhoul_canBeAttracted_FUN_004e82d0(CGhoul *this_ptr,CVector3f *out_attract_position);
+CVector3f * __cdecl core_ghoul_cpp_CGhoul_getTargetPoint_FUN_004e84a0(CGhoul *this_ptr,CVector3f *out_point);
+void __cdecl core_ghoul_cpp_CGhoul_processDismemberment_FUN_004e8520(CGhoul *this_ptr,SDamageInfo *damage_info);
+void __cdecl core_ghoul_cpp_CGhoul_processDamage_FUN_004e87e0(CGhoul *this_ptr,SDamageInfo *damage_info);
+int __cdecl core_ghoul_cpp_CGhoul_getTargetPoints_FUN_004e8bc0(CGhoul *this_ptr,CVector3f *out_points_array);
+void __cdecl core_ghoul_cpp_CGhoul_getPropertyList_FUN_004e8dc0(CGhoul *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_ghoul_cpp_CGhoul_randomize_FUN_004e8e40(CGhoul *this_ptr);
+void __cdecl core_ghoul_cpp_CGhoul_addFilesToExtract_FUN_004e8ee0(CGhoul *this_ptr,_FILE *file_handle);
+CGhoul * __cdecl core_ghoul_cpp_CGhoul_dtor_FUN_004e8f10(CGhoul *this_ptr,uint flags);
+void __cdecl core_glass_cpp_staticInit_FUN_004e8fd0(void);
+CGlass * __cdecl core_glass_cpp_factoryFuncGlass_FUN_004e9000(void);
+CDemonActorType * __cdecl core_glass_cpp_CGlass_getActorType_FUN_004e9030(CGlass *this_ptr);
+CGlass * __cdecl core_glass_cpp_CGlass_ctor_FUN_004e9040(CGlass *this_ptr);
+void __cdecl core_glass_cpp_CGlass_setup_FUN_004e9180(CGlass *this_ptr);
+void __cdecl core_glass_cpp_CGlass_process_FUN_004e98e0(CGlass *this_ptr,float delta_time);
+int __cdecl core_glass_cpp_CGlass_renderOpaque_FUN_004e9930(CGlass *this_ptr);
+int __cdecl core_glass_cpp_CGlass_renderTransparent_FUN_004e9af0(CGlass *this_ptr);
+void __cdecl core_glass_cpp_CGlass_renderBrokenGlass_FUN_004e9ca0(CGlass *this_ptr);
+void __cdecl core_glass_cpp_CGlass_renderBackground_FUN_004e9e90(CGlass *this_ptr,int layer_flag);
+CBoundingBox3D * __cdecl core_glass_cpp_CGlass_getBoundingBox_FUN_004ea030(CGlass *this_ptr,CBoundingBox3D *out_box);
+void __cdecl core_glass_cpp_CGlass_archive_FUN_004ea090(CGlass *this_ptr);
+ECollisionType __cdecl core_glass_cpp_CGlass_getCollisionType_FUN_004ea190(CGlass *this_ptr,SCollisionInfo *collision_info);
+void __cdecl core_glass_cpp_CGlass_createShatterParticles_FUN_004ea1c0(CGlass *this_ptr,SQuadVertices *quad_vertices,CVector4i *quad_uv_u,CVector4i *quad_uv_v,int subdivision_level);
+void __cdecl core_glass_cpp_CGlass_shatter_FUN_004eaef0(CGlass *this_ptr,CVector3f *location);
+void __cdecl core_glass_cpp_CGlass_onLaserHit_FUN_004eb250(CGlass *this_ptr,SLaserInfo *laser_info);
+EGroundType __cdecl core_glass_cpp_CGlass_getGroundType_FUN_004eb390(CGlass *this_ptr);
+int __cdecl core_glass_cpp_CGlass_checkBreakableCondition_FUN_004eb3a0(CGlass *this_ptr);
+void __cdecl core_glass_cpp_CGlass_getPropertyList_FUN_004eb3c0(CGlass *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_glass_cpp_CGlass_processInEditor_FUN_004eb490(CGlass *this_ptr);
+void __cdecl core_glass_cpp_CGlass_showEditorHelp_FUN_004eb600(CGlass *this_ptr,int *y_pos);
+void __cdecl core_glass_cpp_CGlass_addFilesToExtract_FUN_004eb690(CGlass *this_ptr,_FILE *file_handle);
+CGlass * __cdecl core_glass_cpp_CGlass_dtor_FUN_004eb820(CGlass *this_ptr,uint flags);
+CVector3f * __cdecl core_glass_cpp_CVector3f_arrdtor25_FUN_004eb8a0(CVector3f *this_ptr,uint flags);
+void __cdecl core_gore_cpp_staticInit_FUN_004eb8c0(void);
+void __cdecl core_gore_cpp_getBloodColorParams_FUN_004eb950(int blood_type,int *out_light,int *out_color,int *out_fog);
+void __cdecl core_gore_cpp_CBloodParticle_setup_FUN_004eb9a0(CBloodParticle *this_ptr,CVector3f *position,CVector3f *velocity,int blood_type);
+void __cdecl core_gore_cpp_CBloodParticle_setupRenderState_FUN_004eb9d0(CBloodParticle *this_ptr);
+void __cdecl core_gore_cpp_CBloodParticle_render_FUN_004ebac0(CBloodParticle *this_ptr);
+int __cdecl core_gore_cpp_CBloodParticle_onCollision_FUN_004ec290(CBloodParticle *this_ptr,CVector3f *collision_normal);
+void __cdecl core_gore_cpp_CBloodSplat_initGroundSplat_FUN_004ec2f0(CBloodSplat *this_ptr,CVector3f *position,int blood_type);
+void __cdecl core_gore_cpp_CBloodSplat_initWallSplat_FUN_004ec390(CBloodSplat *this_ptr,CVector3f *position,CVector3f *normal,int blood_type);
+void __cdecl core_gore_cpp_CBloodSplat_setupRenderState_FUN_004ec470(CBloodSplat *this_ptr);
+void __cdecl core_gore_cpp_CBloodSplat_render_FUN_004ec500(CBloodSplat *this_ptr,int expire_flag);
+void __cdecl core_gore_cpp_CBloodSplat_processAge_FUN_004ecad0(CBloodSplat *this_ptr);
+int __cdecl core_gore_cpp_CBloodSplat_load_FUN_004ecb00(CBloodSplat *this_ptr,_FILE *file_handle);
+int __cdecl core_gore_cpp_CBloodSplat_save_FUN_004ecb90(CBloodSplat *this_ptr,_FILE *file_handle);
+int __cdecl core_gore_cpp_CBloodPool_setupRenderState_FUN_004ecc40(CBloodPool *this_ptr);
+void __cdecl core_gore_cpp_CBloodPool_render_FUN_004ecce0(CBloodPool *this_ptr,int expire_flag);
+void __cdecl core_gore_cpp_CBloodPool_processAge_FUN_004ed0a0(CBloodPool *this_ptr);
+void __cdecl core_gore_cpp_CBloodPool_init_FUN_004ed0d0(CBloodPool *this_ptr,CVector3f *position,int blood_type);
+int __cdecl core_gore_cpp_CBloodPool_load_FUN_004ed160(CBloodPool *this_ptr,_FILE *file_handle);
+int __cdecl core_gore_cpp_CBloodPool_save_FUN_004ed1c0(CBloodPool *this_ptr,_FILE *file_handle);
+void __cdecl core_gore_cpp_CFootstep_init_FUN_004ed240(CFootstep *this_ptr,CVector3f *position,UOrientationVector *orientation,int is_bloody,int alpha,int blood_type);
+void __cdecl core_gore_cpp_CFootstep_render_FUN_004ed3c0(CFootstep *this_ptr,int expire_flag);
+CGore * __cdecl core_gore_cpp_CGore_ctor_FUN_004ed730(CGore *this_ptr);
+CGore * __cdecl core_gore_cpp_CGore_dtor_FUN_004ed750(CGore *this_ptr,uint flags);
+void __cdecl core_gore_cpp_CGore_reset_FUN_004ed760(CGore *this_ptr);
+void __cdecl core_gore_cpp_CGore_renderParticles_FUN_004ed7b0(CGore *this_ptr);
+void __cdecl core_gore_cpp_CGore_renderDecals_FUN_004ed830(CGore *this_ptr,int render_all,int expire_flag);
+void __cdecl core_gore_cpp_CGore_process_FUN_004ed9e0(CGore *this_ptr);
+void __cdecl core_gore_cpp_CGore_spawnBloodParticles_FUN_004edaa0(CGore *this_ptr,CVector3f *position,CVector3f *velocity,int blood_type);
+CBloodSplat * __cdecl core_gore_cpp_CGore_allocateBloodSplat_FUN_004edaf0(CGore *this_ptr);
+void __cdecl core_gore_cpp_CGore_createGroundBloodSplat_FUN_004edb40(CGore *this_ptr,CVector3f *position,int blood_type);
+void __cdecl core_gore_cpp_CGore_createWallBloodSplat_FUN_004edb70(CGore *this_ptr,CVector3f *position,CVector3f *normal,int blood_type);
+void __cdecl core_gore_cpp_CGore_spawnBloodBurst_FUN_004edbb0(CGore *this_ptr,CVector3f *position,CVector3f *direction,int count,int blood_type);
+CBloodPool * __cdecl core_gore_cpp_CGore_allocateBloodPool_FUN_004edde0(CGore *this_ptr);
+void __cdecl core_gore_cpp_CGore_createBloodPool_FUN_004ede30(CGore *this_ptr,CVector3f *position,int blood_type);
+void __cdecl core_gore_cpp_CGore_loadAssets_FUN_004ede60(CGore *this_ptr);
+CFlies * __cdecl core_gore_cpp_CGore_spawnFlies_FUN_004edf30(CGore *this_ptr,CVector3f *position,int gather_count,float spawn_rate,CVector3f *box_size);
+void __cdecl core_gore_cpp_CGore_spawnFliesOnActor_FUN_004ee030(CGore *this_ptr,CDemonActor *actor,int gather_count,float spawn_rate,CVector3f *box_size);
+void __cdecl core_gore_cpp_CGore_createFootstep_FUN_004ee070(CGore *this_ptr,CVector3f *position,UOrientationVector *orientation,int surface_type ,int alpha,int blood_type);
+int __cdecl core_gore_cpp_CGore_findBloodTypeAtPosition_FUN_004ee0f0(CGore *this_ptr,CVector3f *position,int *out_blood_type);
+int __cdecl core_gore_cpp_CGore_load_FUN_004ee1e0(CGore *this_ptr,_FILE *file_handle);
+int __cdecl core_gore_cpp_CGore_save_FUN_004ee290(CGore *this_ptr,_FILE *file_handle);
+CVector3f * __cdecl core_gore_cpp_convertVecFloatToFixed_FUN_004ee340(CVector3f *src,CVector3i *dst);
+CFootstep * __cdecl core_gore_cpp_CFootstep_ctor_FUN_004ee370(CFootstep *this_ptr);
+CFootstep * __cdecl core_gore_cpp_CFootstep_dtor_FUN_004ee390(CFootstep *this_ptr,uint flags);
+CBloodPool * __cdecl core_gore_cpp_CBloodPool_ctor_FUN_004ee3b0(CBloodPool *this_ptr);
+CBloodPool * __cdecl core_gore_cpp_CBloodPool_dtor_FUN_004ee3c0(CBloodPool *this_ptr,uint flags);
+CBloodSplat * __cdecl core_gore_cpp_CBloodSplat_ctor_FUN_004ee3d0(CBloodSplat *this_ptr);
+CBloodSplat * __cdecl core_gore_cpp_CBloodSplat_dtor_FUN_004ee3e0(CBloodSplat *this_ptr,uint flags);
+CBloodParticle * __cdecl core_gore_cpp_CBloodParticle_ctor_FUN_004ee3f0(CBloodParticle *this_ptr);
+CBloodParticle * __cdecl core_gore_cpp_CBloodParticle_dtor_FUN_004ee410(CBloodParticle *this_ptr,uint flags);
+CFootstep * __cdecl core_gore_cpp_CFootstep_arrdtor1000_FUN_004ee420(CFootstep *this_ptr,uint flags);
+CBloodPool * __cdecl core_gore_cpp_CBloodPool_arrdtor32_FUN_004ee440(CBloodPool *this_ptr,uint flags);
+CBloodSplat * __cdecl core_gore_cpp_CBloodSplat_arrdtor2000_FUN_004ee460(CBloodSplat *this_ptr,uint flags);
+CBloodParticle * __cdecl core_gore_cpp_CBloodParticle_arrdtor256_FUN_004ee480(CBloodParticle *this_ptr,uint flags);
+void __cdecl core_grave_cpp_staticInit_FUN_004ee4a0(void);
+CGrave * __cdecl core_grave_cpp_factoryFuncGrave_FUN_004ee4d0(void);
+CDemonActorType * __cdecl core_grave_cpp_CGrave_getActorType_FUN_004ee500(CGrave *this_ptr);
+CGrave * __cdecl core_grave_cpp_CGrave_ctor_FUN_004ee510(CGrave *this_ptr);
+void __cdecl core_grave_cpp_CGrave_setup_FUN_004ee5a0(CGrave *this_ptr);
+void __cdecl core_grave_cpp_CGrave_process_FUN_004ee5c0(CGrave *this_ptr,float delta_time);
+int __cdecl core_grave_cpp_CGrave_renderOpaque_FUN_004ee680(CGrave *this_ptr);
+void __cdecl core_grave_cpp_CGrave_renderBackground_FUN_004ee710(CGrave *this_ptr,int layer_flag);
+void __cdecl core_grave_cpp_CGrave_startAnimation_FUN_004ee790(CGrave *this_ptr);
+void __cdecl core_grave_cpp_CGrave_archive_FUN_004ee7f0(CGrave *this_ptr);
+CBoundingBox3D * __cdecl core_grave_cpp_CGrave_getBoundingBox_FUN_004ee8f0(CGrave *this_ptr,CBoundingBox3D *out_box);
+ECollisionType __cdecl core_grave_cpp_CGrave_getCollisionType_FUN_004ee9d0(CGrave *this_ptr,SCollisionInfo *collision_info);
+void __cdecl core_grave_cpp_CGrave_getPropertyList_FUN_004ee9e0(CGrave *this_ptr,CActorPropertyList *property_list);
+void __cdecl core_grave_cpp_CGrave_processInEditor_FUN_004eea70(CGrave *this_ptr);
+void __cdecl core_grave_cpp_CGrave_showEditorHelp_FUN_004eead0(CGrave *this_ptr,int *y_pos);
+void __cdecl core_grave_cpp_CGrave_addFilesToExtract_FUN_004eeb10(CGrave *this_ptr,_FILE *file_handle);
+CGrave * __cdecl core_grave_cpp_CGrave_dtor_FUN_004eeb40(CGrave *this_ptr,uint flags);
+void __cdecl core_ground_cpp_staticInit_FUN_004eeb90(void);
+_FILE * __cdecl core_ground_cpp_openFileWithExtension_FUN_004eebc0(char *directory,char *filename,char *new_extension,char *open_mode);
+char * __cdecl core_ground_cpp_getGroundTypeCode_FUN_004eece0(EGroundType type);
+char * __cdecl core_ground_cpp_getGroundTypeName_FUN_004eed80(EGroundType type);
+uint __cdecl core_ground_cpp_getGroundTypeColor_FUN_004eee20(EGroundType type);
+CGround * __cdecl core_ground_cpp_CGround_ctor_FUN_004eee80(CGround *this_ptr,int width,int height);
+CGround * __cdecl core_ground_cpp_CGround_dtor_FUN_004eeee0(CGround *this_ptr,uint flags);
+void __cdecl core_ground_cpp_CGround_init_FUN_004eef00(CGround *this_ptr);
+void __cdecl core_ground_cpp_CGround_free_FUN_004eefb0(CGround *this_ptr);
+void __cdecl core_ground_cpp_CGround_load_FUN_004ef030(CGround *this_ptr,char *filename);
+int __cdecl core_ground_cpp_CGround_getVertexIndex_FUN_004ef380(CGround *this_ptr,int column,int row);
+void __cdecl core_ground_cpp_CGround_transformAndStoreVertex_FUN_004ef3a0(CGround *this_ptr,int column,int row);
+void __cdecl core_ground_cpp_CGround_transformAndStoreVertices_FUN_004ef490(CGround *this_ptr);
+void __cdecl core_ground_cpp_CGround_setQuadTextureCoordinates_FUN_004ef880(CGround *this_ptr,int column,int row);
+void __cdecl core_ground_cpp_CGround_renderTerrainPrimitive_FUN_004ef970(CGround *this_ptr,SMRGLHeaderPrimitive *primitive);
+void __cdecl core_ground_cpp_CGround_renderTerrainQuad_FUN_004ef990(CGround *this_ptr,int world_column,int world_row);
+void __cdecl core_ground_cpp_CGround_renderVisibleTerrain_FUN_004efb70(CGround *this_ptr);
+void __cdecl core_ground_cpp_CGround_render_FUN_004efc90(CGround *this_ptr);
+int __cdecl core_ground_cpp_CGround_getHeightAtPosition_FUN_004efd30(CGround *this_ptr,int world_x,int world_z);
+CVector3i * __stack3_esi core_ground_cpp_CGround_getNormalAtPosition_FUN_004effb0(CGround *this_ptr,int world_x,int world_z,CVector3i *out_normal);
+

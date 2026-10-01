@@ -1,0 +1,26 @@
+// Name: shape_edittool.cpp_CEdScrollBar_clampScrollPosition_FUN_004a6380
+// Address: 004a6380
+// Address Range: [[004a6380, 004a63aa]]
+// Convention: __cdecl
+// Signature: void __cdecl shape_edittool_cpp_CEdScrollBar_clampScrollPosition_FUN_004a6380(CEdScrollBar *this_ptr)
+
+#include "nocturne.h"
+
+void __cdecl shape_edittool_cpp_CEdScrollBar_clampScrollPosition_FUN_004a6380(CEdScrollBar *this_ptr)
+
+{
+  int iVar1;
+  
+  iVar1 = this_ptr->current_value - this_ptr->max_value;
+  if (iVar1 < this_ptr->scroll_position) {
+    this_ptr->scroll_position = iVar1;
+    if (-1 < this_ptr->scroll_position) {
+      return;
+    }
+  }
+  else if (-1 < this_ptr->scroll_position) {
+    return;
+  }
+  this_ptr->scroll_position = 0;
+  return;
+}
