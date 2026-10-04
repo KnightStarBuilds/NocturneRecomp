@@ -43,10 +43,21 @@
 #include <mutex>
 #include <system_error>
 #include <thread>
+#if defined(NOCTURNE_PS4)
+#include "recursive_mutex.h"
+using NocturneRecursiveMutex = nocturne::ps4::RecursiveMutex;
+using NocturneTimedMutex = nocturne::ps4::RecursiveMutex;
+#else
+using NocturneRecursiveMutex = std::recursive_mutex;
+using NocturneTimedMutex = std::recursive_timed_mutex;
+#endif
 #include <sys/stat.h>
 // How much memory the machine has is the one question with no portable answer,
 // so its header is chosen the same way its implementation is. See host_memory.
-#if defined(__linux__)
+#if defined(NOCTURNE_PS4)
+// Console memory reporting uses the conservative fallback below; the SDK has
+// no host sysinfo/sysctl header with the desktop ABI.
+#elif defined(__linux__)
 #include <sys/sysinfo.h>
 #elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || \
       defined(__NetBSD__)
@@ -161,7 +172,7 @@ struct ThreadHandle {
 
 struct MutexHandle {
     int tag;
-    std::recursive_timed_mutex mutex;
+    NocturneTimedMutex mutex;
 };
 
 struct EventHandle {
@@ -901,7 +912,7 @@ static DWORD shim_WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds) {
 // something of its own too. Recursive, because that is what a critical section
 // is: the thread holding one can enter it again.
 static void shim_InitializeCriticalSection(LPCRITICAL_SECTION lpCriticalSection) {
-    std::recursive_mutex* mtx = new (std::nothrow) std::recursive_mutex();
+    NocturneRecursiveMutex* mtx = new (std::nothrow) NocturneRecursiveMutex();
     lpCriticalSection->LockSemaphore = (HANDLE)mtx;
     lpCriticalSection->LockCount = -1;
     lpCriticalSection->RecursionCount = 0;
@@ -909,7 +920,7 @@ static void shim_InitializeCriticalSection(LPCRITICAL_SECTION lpCriticalSection)
 }
 
 static void shim_DeleteCriticalSection(LPCRITICAL_SECTION lpCriticalSection) {
-    std::recursive_mutex* mtx = (std::recursive_mutex*)lpCriticalSection->LockSemaphore;
+    NocturneRecursiveMutex* mtx = (NocturneRecursiveMutex*)lpCriticalSection->LockSemaphore;
     if (mtx) {
         delete mtx;
         lpCriticalSection->LockSemaphore = NULL;
@@ -917,12 +928,12 @@ static void shim_DeleteCriticalSection(LPCRITICAL_SECTION lpCriticalSection) {
 }
 
 static void shim_EnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection) {
-    std::recursive_mutex* mtx = (std::recursive_mutex*)lpCriticalSection->LockSemaphore;
+    NocturneRecursiveMutex* mtx = (NocturneRecursiveMutex*)lpCriticalSection->LockSemaphore;
     if (mtx) mtx->lock();
 }
 
 static void shim_LeaveCriticalSection(LPCRITICAL_SECTION lpCriticalSection) {
-    std::recursive_mutex* mtx = (std::recursive_mutex*)lpCriticalSection->LockSemaphore;
+    NocturneRecursiveMutex* mtx = (NocturneRecursiveMutex*)lpCriticalSection->LockSemaphore;
     if (mtx) mtx->unlock();
 }
 
@@ -1114,7 +1125,7 @@ static void host_memory_fallback(HostMemory *out) {
     out->avail_commit = 512ull * 1024 * 1024;
 }
 
-#if defined(__linux__)
+#if defined(__linux__) && !defined(NOCTURNE_PS4)
 
 // MemAvailable is the kernel's own estimate of what a new allocation could
 // actually get, which is a better answer than free memory: most of a healthy
@@ -1187,8 +1198,8 @@ static void host_memory(HostMemory *out) {
     out->avail_commit = status.ullAvailPageFile;
 }
 
-#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || \
-      defined(__NetBSD__)
+#elif !defined(NOCTURNE_PS4) && (defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || \
+      defined(__NetBSD__))
 
 // The BSDs and macOS answer through sysctl. Total is asked for directly;
 // available is not reported in a form that means the same thing, so it is left
@@ -1313,7 +1324,7 @@ static ssize_t host_program_path(char* out, size_t cap) {
     if (len > cap - 1) len = cap - 1;
     memcpy(out, path, len);
     return (ssize_t)len;
-#elif defined(__APPLE__)
+#elif defined(NOCTURNE_PS4) || defined(__APPLE__)
     const std::string path = nocturne::executable_path().string();
     const size_t len = std::min(path.size(), cap - 1);
     memcpy(out, path.data(), len);

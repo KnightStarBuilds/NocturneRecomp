@@ -21,6 +21,7 @@
 #include "shim_config.h"
 #include "gl/gl_present.h"
 #include "gl/window_mode.h"
+#include "smoke_probe.h"
 
 extern SDL_Window* g_sdlWindow;
 extern bool g_sdlWindowReadyToShow;
@@ -439,6 +440,12 @@ static HRESULT ddraw_SetDisplayMode(IDirectDraw* this_ptr, DWORD width, DWORD he
     // very first mode set of a fresh profile.
     DWORD win_w = width * NOCTURNE_WINDOW_SCALE;
     DWORD win_h = height * NOCTURNE_WINDOW_SCALE;
+#if defined(NOCTURNE_PS4) && NOCTURNE_PS4
+    // VideoOut scales this virtual game window onto the complete TV display.
+    // Keep the SDL rasterizer at game resolution, independent of the TV size.
+    win_w = width;
+    win_h = height;
+#else
     {
         int pref_w = 0, pref_h = 0;
         if (nocturne_window_preferred_size(&pref_w, &pref_h)) {
@@ -446,6 +453,7 @@ static HRESULT ddraw_SetDisplayMode(IDirectDraw* this_ptr, DWORD width, DWORD he
             win_h = (DWORD)pref_h;
         }
     }
+#endif
 
     if (!ddraw->window) {
         if (g_sdlWindow) {
@@ -453,6 +461,9 @@ static HRESULT ddraw_SetDisplayMode(IDirectDraw* this_ptr, DWORD width, DWORD he
             ddraw->owns_window = 0;
         } else {
             Uint32 flags = SDL_WINDOW_HIDDEN;
+#if defined(NOCTURNE_PS4) && NOCTURNE_PS4
+            flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+#endif
 #if NOCTURNE_GL_PRESENT
             nocturne_gl_prepare_window();
             flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
@@ -471,11 +482,15 @@ static HRESULT ddraw_SetDisplayMode(IDirectDraw* this_ptr, DWORD width, DWORD he
         if (nocturne_gl_init(ddraw->window)) {
             nocturne_gl_set_logical_size(width, height);
         } else {
+#if defined(NOCTURNE_PS4) && NOCTURNE_PS4
+            ddraw->renderer = SDL_CreateRenderer(ddraw->window, -1, SDL_RENDERER_SOFTWARE);
+#else
             ddraw->renderer = SDL_CreateRenderer(ddraw->window, -1,
                                                   SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
             if (!ddraw->renderer) {
                 ddraw->renderer = SDL_CreateRenderer(ddraw->window, -1, 0);
             }
+#endif
             if (!ddraw->renderer) return DDERR_GENERIC;
 
             SDL_RenderSetLogicalSize(ddraw->renderer, width, height);
@@ -700,6 +715,7 @@ static HRESULT surface_Flip(IDirectDrawSurface* this_ptr,
                              source->sdl_surface->pitch);
             SDL_RenderClear(shim->ddraw->renderer);
             SDL_RenderCopy(shim->ddraw->renderer, tex, nullptr, nullptr);
+            nocturne_smoke_before_sdl_present(shim->ddraw->window, shim->ddraw->renderer);
             SDL_RenderPresent(shim->ddraw->renderer);
         }
     }
@@ -888,6 +904,7 @@ static HRESULT surface_Unlock(IDirectDrawSurface* this_ptr, void* surface_ptr) {
                              shim->sdl_surface->pixels, shim->sdl_surface->pitch);
             SDL_RenderClear(shim->ddraw->renderer);
             SDL_RenderCopy(shim->ddraw->renderer, shim->sdl_texture, nullptr, nullptr);
+            nocturne_smoke_before_sdl_present(shim->ddraw->window, shim->ddraw->renderer);
             SDL_RenderPresent(shim->ddraw->renderer);
         }
     }

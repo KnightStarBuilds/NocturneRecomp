@@ -693,6 +693,7 @@ extern "C" void nocturne_gl_shutdown(void) {
 
 #else  // !NOCTURNE_GL_PRESENT
 
+extern "C" const char *nocturne_gl_version_short(void) { return ""; }
 extern "C" void nocturne_gl_prepare_window(void) {}
 extern "C" int  nocturne_gl_init(SDL_Window *w) { (void)w; return 0; }
 extern "C" int  nocturne_gl_is_active(void) { return 0; }

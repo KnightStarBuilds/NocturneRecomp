@@ -18,7 +18,7 @@ struct Mode { int width; int height; };
 // shipped chain could describe but never select — plus 1600x1200, which was in
 // g_ResolutionTable all along with no way to choose it.
 const Mode kModes[] = {
-#if defined(__APPLE__) && !NOCTURNE_EXPERIMENTAL_RESOLUTIONS
+#if defined(NOCTURNE_PS4) || (defined(__APPLE__) && !NOCTURNE_EXPERIMENTAL_RESOLUTIONS)
     { 640,  480 },
 #else
     { 320,  240 },

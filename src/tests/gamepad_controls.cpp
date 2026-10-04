@@ -32,6 +32,8 @@ std::array<Sint16, SDL_CONTROLLER_AXIS_MAX> axes{};
 std::array<Uint8, SDL_CONTROLLER_BUTTON_MAX> buttons{};
 unsigned checks = 0;
 unsigned failures = 0;
+unsigned item_description_requests = 0;
+CInventory* described_inventory = nullptr;
 
 void check(bool condition, const char* message) {
     ++checks;
@@ -75,10 +77,113 @@ void reset_frame() {
     std::memset(g_KeyboardState, 0, sizeof(g_KeyboardState));
     std::memset(g_PrevKeyboardState, 0, sizeof(g_PrevKeyboardState));
     game = {};
+    game.game_control = CONTROL_MODE_GAMEPAD;
     nocturne_gamepad_apply_defaults(&game);
     game.x_mouse_sensitivity = 0x10000;
     game.y_mouse_sensitivity = 0x10000;
     game.delta_time_float = 0.02f;
+    item_description_requests = 0;
+    described_inventory = nullptr;
+}
+
+void test_platform_bindings() {
+    reset_frame();
+    const int map_button = SDL_CONTROLLER_BUTTON_BACK;
+#if defined(NOCTURNE_PS4)
+    const int description_button = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+    const int unused_description_button = SDL_CONTROLLER_BUTTON_GUIDE;
+    const char* map_label = "Touchpad";
+#else
+    const int description_button = SDL_CONTROLLER_BUTTON_GUIDE;
+    const int unused_description_button = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
+    const char* map_label = "Share";
+#endif
+    check(game.key_item_desc == NOCTURNE_PAD_BUTTON(description_button),
+          "item description uses the platform's default controller button");
+    check(map_binding == NOCTURNE_PAD_BUTTON(map_button),
+          "map retains the saved SDL BACK input code");
+    check(std::strcmp(nocturne_gamepad_code_name(map_binding), map_label) == 0,
+          "map label identifies the physical button on this platform");
+    buttons[map_button] = 1;
+    nocturne_gamepad_pump();
+    check(g_KeyboardState[map_binding] != 0,
+          "physical map button reaches its configured engine input code");
+
+    reset_frame();
+    buttons[description_button] = 1;
+    nocturne_gamepad_pump();
+    SPlayerInput input{};
+    core_game_cpp_CGame_processJoystickControls_FUN_004dc230(&game, &input);
+    check(item_description_requests == 1 && described_inventory == &hero.inventory,
+          "description button reaches the current hero's inventory through recovered controls");
+    nocturne_gamepad_pump();
+    core_game_cpp_CGame_processJoystickControls_FUN_004dc230(&game, &input);
+    check(item_description_requests == 1, "held description button toggles only once");
+
+    reset_frame();
+    buttons[unused_description_button] = 1;
+    nocturne_gamepad_pump();
+    core_game_cpp_CGame_processJoystickControls_FUN_004dc230(&game, &input);
+    check(item_description_requests == 0,
+          "the other platform's description default does not activate this binding");
+}
+
+void test_saved_binding_migration() {
+    reset_frame();
+    game.key_item_desc = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_GUIDE);
+    game.key_fire = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
+    game.always_run = 1;
+    game.x_mouse_sensitivity = 12345;
+    map_binding = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_X);
+    CGame expected = game;
+#if defined(NOCTURNE_PS4)
+    expected.key_item_desc = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+#endif
+    nocturne_gamepad_reseed_for_mode(&game);
+    check(std::memcmp(&game, &expected, sizeof(game)) == 0,
+          "only the obsolete PS4 Guide description binding migrates; desktop and custom settings survive");
+    check(map_binding == NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_X),
+          "saved custom map binding survives description migration");
+
+    const int custom_bindings[] = {
+        NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSTICK),
+        NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_Y), DIK_F1, INPUT_NONE
+    };
+    for (const int binding : custom_bindings) {
+        game.key_item_desc = binding;
+        const CGame saved = game;
+        nocturne_gamepad_reseed_for_mode(&game);
+        check(std::memcmp(&game, &saved, sizeof(game)) == 0,
+              "custom or unassigned item description binding remains user-owned");
+    }
+
+    game.key_item_desc = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_GUIDE);
+    game.key_run = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+    CGame collision = game;
+    nocturne_gamepad_reseed_for_mode(&game);
+    check(std::memcmp(&game, &collision, sizeof(game)) == 0,
+          "description migration does not steal a custom R3 action binding");
+    game.key_run = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_LEFTSTICK);
+    map_binding = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+    collision = game;
+    nocturne_gamepad_reseed_for_mode(&game);
+    check(std::memcmp(&game, &collision, sizeof(game)) == 0 &&
+              map_binding == NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSTICK),
+          "description migration does not steal a custom R3 map binding");
+
+    reset_frame();
+    game.key_fire = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_TOUCHPAD);
+    map_binding = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_TOUCHPAD);
+    expected = game;
+#if defined(NOCTURNE_PS4)
+    expected.key_fire = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_BACK);
+    const int expected_map = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_BACK);
+#else
+    const int expected_map = map_binding;
+#endif
+    nocturne_gamepad_reseed_for_mode(&game);
+    check(std::memcmp(&game, &expected, sizeof(game)) == 0 && map_binding == expected_map,
+          "Touchpad aliases normalize only on PS4; desktop bindings retain their codes");
 }
 
 void test_run_bindings() {
@@ -199,6 +304,9 @@ extern "C" SDL_Joystick* SDL_GameControllerGetJoystick(SDL_GameController*) {
     return reinterpret_cast<SDL_Joystick*>(&joystick_token);
 }
 extern "C" SDL_JoystickID SDL_JoystickInstanceID(SDL_Joystick*) { return 1; }
+extern "C" SDL_GameControllerType SDL_GameControllerGetType(SDL_GameController*) {
+    return SDL_CONTROLLER_TYPE_PS4;
+}
 extern "C" SDL_Window* SDL_GetKeyboardFocus() {
     return focused ? reinterpret_cast<SDL_Window*>(&window_token) : nullptr;
 }
@@ -213,7 +321,10 @@ extern "C" void nocturne_net_weapon_request(int, int, int) { unexpected_service(
 extern "C" void nocturne_goggle_look_reset() { unexpected_service(); }
 void core_game_cpp_CGame_restoreDefaultControls_FUN_004dbbc0(CGame*) { unexpected_service(); }
 void wincore_winrun_cpp_enqueueInput_FUN_005f2f30(int) { unexpected_service(); }
-void core_inv_cpp_CInventory_toggleDetailView_FUN_00501500(CInventory*) { unexpected_service(); }
+void core_inv_cpp_CInventory_toggleDetailView_FUN_00501500(CInventory* inventory) {
+    ++item_description_requests;
+    described_inventory = inventory;
+}
 int core_setdir_cpp_CDemonSet_evaluateVirtualDirector_FUN_005751d0(CDemonSet*, CDemonActor*, int) { unexpected_service(); }
 void core_set_cpp_CDemonSet_setCameraView_FUN_0056ae50(CDemonSet*, int) { unexpected_service(); }
 
@@ -228,6 +339,8 @@ int main() {
     nocturne_gamepad_suppress_nav(1);
     nocturne_gamepad_init();
     check(nocturne_gamepad_present() != 0, "fixture controller was opened");
+    test_platform_bindings();
+    test_saved_binding_migration();
     test_run_bindings();
     test_analog_ownership();
     std::printf("Gamepad controls: %u checks, %u failures\n", checks, failures);

@@ -92,7 +92,7 @@ int main() {
             bool rejected = false;
             try { nocturne::prepare_runtime(invalid_options); }
             catch (const std::exception&) { rejected = true; }
-            check(rejected && !fs::exists(invalid_options.user_dir), "invalid game arguments rejected before profile writes");
+            check(rejected && !fs::exists(invalid_options.user_dir), "invalid startup input rejected before profile writes");
         };
         boundary_options.game_args.push_back("x");
         reject_before_write(boundary_options);
@@ -109,6 +109,42 @@ int main() {
         try { nocturne::prepare_runtime(nested_options); }
         catch (const std::exception&) { nested_rejected = true; }
         check(nested_rejected && !fs::exists(nested_options.user_dir), "profile cannot mutate original data tree");
+        // Desktop diagnostics canonicalize an existing output directory before
+        // profile creation; querying paths must leave the environment intact.
+        const auto captures = root / "Diagnostic Output";
+        fs::create_directory(captures);
+        for (const auto& output : {root / "Missing Output", root / "Game Data/ACT1.POD",
+                                   fs::path("relative-output")}) {
+            auto invalid_options = options;
+            invalid_options.smoke_dir = output;
+            reject_before_write(invalid_options);
+        }
+        auto diagnostic_options = options;
+        diagnostic_options.user_dir = root / "Diagnostic Profile";
+        diagnostic_options.smoke_dir = captures / ".";
+        diagnostic_options.smoke_seconds = 7.5;
+        diagnostic_options.smoke_capture_at = "1,5";
+        diagnostic_options.smoke_keys = "3:Escape";
+        env("NOCTURNE_SMOKE_DIR", "inherited-output");
+        env("NOCTURNE_SMOKE_SECONDS", "60");
+        env("NOCTURNE_SMOKE_CAPTURE_AT", "20");
+        env("NOCTURNE_SMOKE_KEYS", "30:Return");
+        const auto diagnostic_cwd = fs::current_path();
+        diagnostic_options.print_paths = true;
+        check(!nocturne::prepare_runtime(diagnostic_options) &&
+              !fs::exists(diagnostic_options.user_dir) && fs::current_path() == diagnostic_cwd &&
+              std::string(std::getenv("NOCTURNE_SMOKE_DIR")) == "inherited-output" &&
+              std::string(std::getenv("NOCTURNE_SMOKE_SECONDS")) == "60" &&
+              std::string(std::getenv("NOCTURNE_SMOKE_CAPTURE_AT")) == "20" &&
+              std::string(std::getenv("NOCTURNE_SMOKE_KEYS")) == "30:Return",
+              "desktop diagnostic path query has no startup side effects");
+        diagnostic_options.print_paths = false;
+        check(nocturne::prepare_runtime(diagnostic_options) &&
+              std::string(std::getenv("NOCTURNE_SMOKE_DIR")) == fs::canonical(captures).string() &&
+              std::stod(std::getenv("NOCTURNE_SMOKE_SECONDS")) == 7.5 &&
+              std::string(std::getenv("NOCTURNE_SMOKE_CAPTURE_AT")) == "1,5" &&
+              std::string(std::getenv("NOCTURNE_SMOKE_KEYS")) == "3:Escape",
+              "desktop diagnostic options publish validated canonical settings");
         // Missing/partial original configuration still gets all native settings.
         fs::create_directories(root / "Bare Assets");
         std::ofstream(root / "Bare Assets/BASE.POD") << "dummy";

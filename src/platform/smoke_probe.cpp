@@ -110,11 +110,16 @@ void key_event(SDL_Keycode code, Uint32 type) {
     SDL_PushEvent(&event);
 }
 
-void capture(Probe& p, SDL_Window* window, Uint32 elapsed) {
+void capture(Probe& p, SDL_Window* window, SDL_Renderer* renderer, Uint32 elapsed) {
     int width = 0, height = 0;
-    SDL_GL_GetDrawableSize(window, &width, &height);
+    if (renderer) SDL_GetRendererOutputSize(renderer, &width, &height);
+    else SDL_GL_GetDrawableSize(window, &width, &height);
     if (width <= 0 || height <= 0 || width > 16384 || height > 16384) return;
     std::vector<unsigned char> pixels(std::size_t(width) * height * 3);
+    if (renderer) {
+        if (SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_RGB24,
+                                 pixels.data(), width * 3) != 0) return;
+    } else {
     GLint framebuffer = 0, buffer = 0, alignment = 0, row_length = 0;
     gl.GetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &framebuffer);
     gl.GetIntegerv(GL_READ_BUFFER, &buffer);
@@ -129,6 +134,7 @@ void capture(Probe& p, SDL_Window* window, Uint32 elapsed) {
     gl.PixelStorei(GL_PACK_ROW_LENGTH, row_length);
     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, GLuint(framebuffer));
     gl.ReadBuffer(GLenum(buffer));
+    }
     char name[80];
     std::snprintf(name, sizeof(name), "frame-%06u-ms-%04u.ppm", elapsed, p.frame++);
     FILE* image = std::fopen((p.directory / name).string().c_str(), "wb");
@@ -136,8 +142,10 @@ void capture(Probe& p, SDL_Window* window, Uint32 elapsed) {
     std::fprintf(image, "P6\n%d %d\n255\n", width, height);
     // Capture the completed backbuffer immediately before swap; convert GL's
     // bottom-left origin to the top-down file convention without rendering again.
-    for (int row = height - 1; row >= 0; --row)
-        std::fwrite(pixels.data() + std::size_t(row) * width * 3, 3, width, image);
+    for (int row = 0; row < height; ++row) {
+        const int source_row = renderer ? row : height - row - 1;
+        std::fwrite(pixels.data() + std::size_t(source_row) * width * 3, 3, width, image);
+    }
     std::fclose(image);
     std::fprintf(p.events, "%u,capture,%s\n", elapsed, name);
     // Native cursors are composed by the window system, outside this GL image.
@@ -146,12 +154,12 @@ void capture(Probe& p, SDL_Window* window, Uint32 elapsed) {
 }
 }
 
-void nocturne_smoke_before_swap(SDL_Window* window) {
+static void before_present(SDL_Window* window, SDL_Renderer* renderer) {
     auto& p = probe();
     if (!p.events) return;
     const Uint32 elapsed = SDL_GetTicks() - p.start;
     while (!p.captures.empty() && elapsed >= p.captures.front()) {
-        capture(p, window, elapsed);
+        capture(p, window, renderer, elapsed);
         p.captures.erase(p.captures.begin());
     }
     while (!p.releases.empty() && elapsed >= p.releases.front().at) {
@@ -185,6 +193,12 @@ void nocturne_smoke_before_swap(SDL_Window* window) {
         p.quit_sent = true;
         std::fprintf(p.events, "%u,quit,requested\n", elapsed);
     }
+}
+
+void nocturne_smoke_before_swap(SDL_Window* window) { before_present(window, nullptr); }
+
+void nocturne_smoke_before_sdl_present(SDL_Window* window, SDL_Renderer* renderer) {
+    if (renderer) before_present(window, renderer);
 }
 
 void nocturne_smoke_audio_queued(const void* pcm, std::size_t bytes, int rate, int channels) {

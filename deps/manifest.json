@@ -2,6 +2,16 @@
   "schema": 1,
   "dependencies": [
     {
+      "name": "openorbis", "version": "0.5.4 (LLVM 18 SDK release)",
+      "targets": ["ps4"],
+      "url": "https://github.com/OpenOrbis/OpenOrbis-PS4-Toolchain/releases/download/v0.5.4/toolchain-llvm-18.tar.gz",
+      "archive": "openorbis-0.5.4-llvm18.tar.gz",
+      "sha256": "3c7cd5bb593ca74fa1c13fd59f3938dc0fc07985167f7275063019e63abe4526",
+      "license": "GPL-3.0 toolchain; musl MIT; LLVM Apache-2.0 with LLVM exceptions; SDL Zlib; LibOrbisPkg LGPL-3.0",
+      "license_files": ["PS4Toolchain/LICENSE", "PS4Toolchain/bin/macos/LICENSE.txt"],
+      "provenance": "OpenOrbis v0.5.4 release asset 356303789; release SHA256 independently verified. Includes target headers, CRT, musl/libc++, import stubs and host conversion/packaging tools."
+    },
+    {
       "name": "sdl2", "version": "2.30.0",
       "url": "https://www.libsdl.org/release/SDL2-2.30.0.tar.gz",
       "archive": "sdl2-2.30.0.tar.gz",

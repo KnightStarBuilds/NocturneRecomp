@@ -20,7 +20,9 @@
 #include "core/debug_log.h"
 #include "net/rng.h"            // nocturne_rng_note_raw_draw() — the rand() audit
 #include <cerrno>
-#if !defined(_WIN32)
+#if defined(NOCTURNE_PS4)
+#include "file_ops.h"
+#elif !defined(_WIN32)
 // Only for taking over remove() and rename(); see the note beside them. A host
 // that accepts the game's paths as they are does not need either.
 #include <dlfcn.h>
@@ -204,8 +206,13 @@ FILE* _FILE_to_FILE(_FILE* f) {
     // Case 2: static standard-stream global — map by _handle.
     switch (f->_handle) {
         case 0: return stdin;
+#if defined(NOCTURNE_PS4)
+        case 1: return nocturne_ps4_log_stream(stdout);
+        case 2: return nocturne_ps4_log_stream(stderr);
+#else
         case 1: return stdout;
         case 2: return stderr;
+#endif
         default: break;
     }
 
@@ -303,16 +310,25 @@ _FILE* _fopen(const char* filename, const char* mode) {
 #if !defined(_WIN32)
 
 extern "C" int remove(const char* path) {
+#if defined(NOCTURNE_PS4)
+    return nocturne_ps4_remove(watcom_resolve_fs_path(path, true).c_str());
+#else
     using remove_fn = int (*)(const char*);
     static remove_fn real_remove = reinterpret_cast<remove_fn>(dlsym(RTLD_NEXT, "remove"));
     return real_remove(watcom_resolve_fs_path(path, true).c_str());
+#endif
 }
 
 extern "C" int rename(const char* oldpath, const char* newpath) {
+#if defined(NOCTURNE_PS4)
+    return nocturne_ps4_rename(watcom_resolve_fs_path(oldpath, true).c_str(),
+                               watcom_resolve_fs_path(newpath, true).c_str());
+#else
     using rename_fn = int (*)(const char*, const char*);
     static rename_fn real_rename = reinterpret_cast<rename_fn>(dlsym(RTLD_NEXT, "rename"));
     return real_rename(watcom_resolve_fs_path(oldpath, true).c_str(),
                        watcom_resolve_fs_path(newpath, true).c_str());
+#endif
 }
 
 #endif  // !_WIN32
@@ -440,12 +456,23 @@ int _fscanf(_FILE* f, const char* format, ...) {
 }
 
 _FILE* _freopen(const char* filename, const char* mode, _FILE* stream) {
+#if defined(NOCTURNE_PS4)
+    // The recovered game's sole freopen redirects stderr to stderr.txt.
+    // Descriptor duplication is unavailable; the adapter updates the standard
+    // stream router while the static Watcom wrapper retains its ownership.
+    FILE* original = stream && !stream->_link && stream->_handle == 2 ? stderr
+        : stream && !stream->_link && stream->_handle == 1 ? stdout : _FILE_to_FILE(stream);
+    FILE* fp = nocturne_ps4_reopen_log(
+        watcom_resolve_fs_path(filename, mode[0] != 'r' || strchr(mode, '+')).c_str(),
+        mode, original);
+#else
     FILE* fp = freopen(watcom_resolve_fs_path(filename, mode[0] != 'r' || strchr(mode, '+')).c_str(),
                        mode, _FILE_to_FILE(stream));
+#endif
     if (!fp) return nullptr;
     // If the caller's stream was one of the game's static stream globals
     // (wrapper _link is null, _handle is 0/1/2), freopen redirected the
-    // libc-side fd for us and the caller wants the same pointer back.
+    // libc-side stream (or PS4 stream router) and the caller wants the same pointer back.
     // Otherwise we were handed an _fopen wrapper; update its _link to
     // point at the new libc FILE and reset _flag. Either way, return
     // the same stream pointer the caller passed in.

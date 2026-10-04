@@ -23,6 +23,11 @@ int __cdecl core_menu_cpp_renderMenuAndGetChoice_FUN_00510000(char **menu_text_a
   char **local_1c;
   char *pcVar7;
   CBitFont *this_ptr;
+#if GAMEPAD_ONLY
+  // Keep the fixed control mode visible, but outside selectable menu rows.
+  const int first_selectable = menu_text_array == g_ControlOptionsMenuPointers ? 1 : 0;
+  if (*selected_index_ptr < first_selectable) *selected_index_ptr = first_selectable;
+#endif
 
   this_ptr = g_ThemeFont;
   if (title != (char *)0x0) {
@@ -65,7 +70,11 @@ int __cdecl core_menu_cpp_renderMenuAndGetChoice_FUN_00510000(char **menu_text_a
           } while (iVar4 < 5);
         }
       }
+#if GAMEPAD_ONLY
+      engine_3d_c_setRenderAlpha_FUN_00406d80(local_20 < first_selectable ? 24000 : 48000);
+#else
       engine_3d_c_setRenderAlpha_FUN_00406d80(48000);
+#endif
       engine_font_cpp_CBitFont_drawText_FUN_004cda80(this_ptr,*local_1c,0xa0,y_position,local_24,-1)
       ;
       y_position = y_position + iVar1;
@@ -114,7 +123,13 @@ int __cdecl core_menu_cpp_renderMenuAndGetChoice_FUN_00510000(char **menu_text_a
     iVar4 = *selected_index_ptr;
     g_MenuInputHappened = 1;
     *selected_index_ptr = iVar4 + -1;
-    if (iVar4 + -1 < 0) {
+    if (iVar4 + -1 <
+#if GAMEPAD_ONLY
+        first_selectable
+#else
+        0
+#endif
+    ) {
       *selected_index_ptr = menu_count + -1;
     }
   }
@@ -124,7 +139,11 @@ int __cdecl core_menu_cpp_renderMenuAndGetChoice_FUN_00510000(char **menu_text_a
     iVar4 = *selected_index_ptr;
     *selected_index_ptr = iVar4 + 1;
     if (menu_count <= iVar4 + 1) {
+#if GAMEPAD_ONLY
+      *selected_index_ptr = first_selectable;
+#else
       *selected_index_ptr = 0;
+#endif
     }
   }
   if (pcVar6 != (char *)0x0) {

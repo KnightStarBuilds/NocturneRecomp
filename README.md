@@ -3,7 +3,7 @@
 A native C++23 port of Nocturne using SDL2 and OpenGL.
 
 The engine and platform code are tracked directly under `src/`. Builds use that
-source and four pinned external dependencies; game assets are supplied separately.
+source and pinned external dependencies; game assets are supplied separately.
 
 ## Prerequisites
 
@@ -30,6 +30,9 @@ data/original/
   SYSTEM/
     nocturne.ini
 ```
+
+POD archives must be directly inside `data/original/`. See the
+[asset audit](docs/assets.md) for archive checks and lookup-order details.
 
 ## macOS — Apple Silicon
 
@@ -90,41 +93,36 @@ Default profile: `~/Library/Application Support/NocturneRecompKnightStar/`.
 
 Use `./run.sh -- --user-dir /path/to/profile` to select a different profile folder.
 
-## Windows
+## PS4 homebrew
 
-### 1. Setup
+An experimental native PS4 target uses the recovered CPU renderer at 640×480.
+The console test target is firmware 9.00 with GoldHEN. Building and
+packaging are separate from the desktop build:
 
-TODO: Document supported versions, toolchain and required packages.
+```sh
+./ps4/build.sh --config=Release
+./ps4/package.sh --config=Release
+```
 
-### 2. Build & Run
+The package includes the original assets you supplied in `data/original/`.
+Scripts, setup instructions, console limitations and validation details are in
+[ps4/README.md](ps4/README.md). Outputs remain under `build/ps4-x86_64/`.
 
-TODO: Add verified build and launch instructions.
+Debug and Release installation, native keyboard controls and save persistence
+have passed directed console checks. See [validation](docs/validation.md) for
+tested scenarios and limitations, and [progress](docs/PROGRESS.md) for remaining
+hardware acceptance.
 
-### 3. Distribution
+PS4 builds force the CMake option `GAMEPAD_ONLY=ON`. It hides the native cursor,
+software pointers and cursor crosshair, and locks the control selector to
+Gamepad. Other platforms default to `OFF`; configure with `-DGAMEPAD_ONLY=ON`
+to enable the same behavior there.
 
-TODO: Document packaging and distribution after validation.
+## Windows and Linux
 
-### 4. Locations
-
-TODO: Verify and document save, configuration and log locations.
-
-## Linux
-
-### 1. Setup
-
-TODO: Document supported distributions, compilers and required packages.
-
-### 2. Build & Run
-
-TODO: Add verified build and launch instructions.
-
-### 3. Distribution
-
-TODO: Document packaging and distribution after validation.
-
-### 4. Locations
-
-TODO: Verify and document save, configuration and log locations.
+Native Windows and Linux build, launch, distribution and profile behavior remain
+unvalidated. Their toolchain paths are retained; remaining setup and validation
+work is tracked in [progress](docs/PROGRESS.md).
 
 ## Project details
 
@@ -137,6 +135,7 @@ TODO: Verify and document save, configuration and log locations.
 | `src/checks/`, `src/tests/` | Layout checks and automated tests |
 | `src/cmake/`, `src/resources/` | Build helpers and controller resources |
 | `deps/` | External dependency pins, licenses and preparation tooling |
+| `ps4/` | PS4 cross-build, platform support and homebrew packaging |
 | `build/<platform>-<arch>/` | Generated files, dependency build copies and binaries |
 
 Edit implementations in `src/` and rebuild with `./build.sh`. Each recovered

@@ -9,6 +9,12 @@
 void __cdecl shape_edittool_cpp_CEditorTools_drawMousePointer_FUN_004a1380(CEditorTools *this_ptr,int use_clipping)
 
 {
+#if GAMEPAD_ONLY
+  // Dialogs share this renderer for all software pointer shapes.
+  (void)this_ptr;
+  (void)use_clipping;
+  return;
+#else
   int iVar1;
   int iVar2;
   int iVar5;
@@ -176,4 +182,5 @@ void __cdecl shape_edittool_cpp_CEditorTools_drawMousePointer_FUN_004a1380(CEdit
     core_main_c_displayErrorAndQuit_FUN_00506f10("CEditorTools::setMousePointerType - invalid type!");
   }
   return;
+#endif
 }

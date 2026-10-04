@@ -7,7 +7,11 @@ foreach(_dependency sdl2 sdl2_ttf ffmpeg liberation-fonts)
         message(FATAL_ERROR "Run ./build.sh to verify and prepare pinned dependencies first.")
     endif()
 endforeach()
-include("${CMAKE_CURRENT_LIST_DIR}/bundledlibs.cmake")
+if(NOCTURNE_PS4)
+    include("${PROJECT_SOURCE_DIR}/ps4/cmake/dependencies.cmake")
+else()
+    include("${CMAKE_CURRENT_LIST_DIR}/bundledlibs.cmake")
+endif()
 
 # More than 6,000 object paths exceed Darwin's command-line limit. Set this only
 # after dependency subdirectories: Apple's ar cannot consume response files.
@@ -127,6 +131,7 @@ if(NOCTURNE_BUILD_CHECK)
     foreach(_definition IN LISTS _nocturne_authentic_defs)
         list(APPEND _check_compiler_flags "-D${_definition}")
     endforeach()
+    list(APPEND _check_compiler_flags "-DGAMEPAD_ONLY=$<BOOL:${GAMEPAD_ONLY}>")
     if(NOCTURNE_EXPERIMENTAL_RESOLUTIONS)
         list(APPEND _check_compiler_flags -DNOCTURNE_EXPERIMENTAL_RESOLUTIONS=1)
     else()
@@ -382,7 +387,7 @@ target_compile_options(nocturne PRIVATE
     ${NOCTURNE_SANITIZE_FLAGS}
     ${SDL2_CFLAGS_OTHER} ${SDL2TTF_CFLAGS_OTHER} ${FFMPEG_CFLAGS_OTHER})
 target_link_options(nocturne PRIVATE ${NOCTURNE_SANITIZE_FLAGS})
-if(NOT WIN32 AND NOT APPLE)
+if(NOT WIN32 AND NOT APPLE AND NOT NOCTURNE_PS4)
     # SDL2 and SDL2_ttf are built here as shared objects, and the link
     # records their absolute paths inside the build tree. That is right for
     # running from build/, and useless once the binary is copied anywhere

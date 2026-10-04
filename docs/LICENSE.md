@@ -48,7 +48,10 @@ Other dependencies retain their own licenses. The
 [dependency manifest](../deps/manifest.json) records their licenses and notice
 paths within the source archives. The macOS bundle copies upstream and dependency
 notices into `Contents/Resources/licenses/`. Game data stays outside tracked source
-and the application bundle.
+and the macOS application bundle. The PS4 installer includes the supplied
+original assets and carries notices under `licenses/`; packaging does not change
+their licensing scope. Additional PS4 runtime notice provenance is recorded in
+[ps4-notices.json](../deps/ps4-notices.json).
 
 Static FFmpeg distribution additionally requires LGPL-compliant relinking
 materials; retain corresponding source, any modifications and relinkable game

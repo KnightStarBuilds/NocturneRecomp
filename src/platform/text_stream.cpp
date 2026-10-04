@@ -1,3 +1,7 @@
+// OpenOrbis uses musl's cookie streams; expose their declarations in strict C++.
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include "text_stream.h"
 #include <string>
 #include <sys/types.h>

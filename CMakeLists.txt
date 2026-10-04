@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(NocturneRecompKnightStar VERSION 0.1.1 LANGUAGES C CXX)
+project(NocturneRecompKnightStar VERSION 0.1.2 LANGUAGES C CXX)
 
 if(NOT CMAKE_GENERATOR STREQUAL "Ninja Multi-Config")
     message(FATAL_ERROR "Use Ninja Multi-Config (or ./build.sh).")
@@ -25,8 +25,18 @@ option(NOCTURNE_BUILD_CHECK "Build optional per-file syntax checks" OFF)
 option(NOCTURNE_USE_CCACHE "Use ccache if installed" OFF)
 option(NOCTURNE_ASAN "Enable AddressSanitizer and supported UBSan checks" OFF)
 option(NOCTURNE_GL_PRESENT "Present through OpenGL (OFF = legacy SDL_Renderer)" ON)
+option(GAMEPAD_ONLY "Lock controls to Gamepad and hide native/software mouse cursors" OFF)
+if(NOCTURNE_PS4)
+    set(GAMEPAD_ONLY ON CACHE BOOL "PS4 requires gamepad-only controls" FORCE)
+    set(NOCTURNE_GL_PRESENT OFF CACHE BOOL "PS4 uses the recovered CPU renderer" FORCE)
+    add_compile_definitions(NOCTURNE_PS4=1 NOCTURNE_GL_PRESENT=0 SDL_MAIN_HANDLED NOCTURNE_WINDOW_MODE_OPTION=0)
+    include_directories("${PROJECT_SOURCE_DIR}/ps4/runtime")
+    # Also update existing CMake caches whose initial compiler flags predate
+    # the SDK's native stat ABI correction.
+    include_directories(BEFORE SYSTEM "${NOCTURNE_PS4_SDK_INCLUDE}")
+endif()
 option(NOCTURNE_VANILLA "Set every authenticity toggle to the shipped behaviour" OFF)
-option(NOCTURNE_EXPERIMENTAL_RESOLUTIONS "Enable unvalidated internal resolutions on macOS" OFF)
+option(NOCTURNE_EXPERIMENTAL_RESOLUTIONS "Enable unvalidated internal resolutions on macOS" ON)
 add_compile_definitions(NOCTURNE_EXPERIMENTAL_RESOLUTIONS=$<BOOL:${NOCTURNE_EXPERIMENTAL_RESOLUTIONS}>)
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 include(src/cmake/options.cmake)
@@ -34,7 +44,9 @@ add_subdirectory(src)
 # The shim tests compile SDL consumers directly; expose the same public headers.
 set(SDL2_INCLUDE_DIRS "$<TARGET_PROPERTY:SDL2::SDL2,INTERFACE_INCLUDE_DIRECTORIES>")
 
-if(APPLE)
+if(NOCTURNE_PS4)
+    include(ps4/cmake/application.cmake)
+elseif(APPLE)
     # Packed recovered globals contain unaligned pointers; traditional dyld
     # relocation opcodes support them, chained pointer fixups do not.
     target_link_options(nocturne PRIVATE "-Wl,-no_fixup_chains")
@@ -59,8 +71,11 @@ else()
 endif()
 
 enable_testing()
-include(src/tests/platform.cmake)
-include(src/tests/renderer.cmake)
+if(NOT NOCTURNE_PS4)
+    include(src/tests/platform.cmake)
+    include(src/tests/renderer.cmake)
+    include(ps4/cmake/host_tests.cmake)
+endif()
 add_test(NAME native_scripts COMMAND "${Python3_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/src/tests/scripts.py")
 if(APPLE)
     add_test(NAME native_bundle COMMAND "${Python3_EXECUTABLE}"

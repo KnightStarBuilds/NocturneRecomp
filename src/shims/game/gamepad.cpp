@@ -180,6 +180,11 @@ void open_first_pad() {
 enum LabelFamily { kXbox, kPlayStation, kNintendo };
 
 LabelFamily label_family() {
+#if defined(NOCTURNE_PS4)
+    // The console backend is a DualShock 4 even when SDL's GUID database is
+    // older than the connected device or reports the generic controller type.
+    return kPlayStation;
+#endif
     if (s_pad == nullptr) {
         return kXbox;
     }
@@ -489,6 +494,12 @@ extern "C" const char *nocturne_gamepad_code_name(int code) {
     if (!NOCTURNE_PAD_IS_CODE(code)) {
         return nullptr;
     }
+#if defined(NOCTURNE_PS4)
+    // The native backend exposes touchpad click as Back for saved map bindings.
+    if (code == NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_BACK)) {
+        return "Touchpad";
+    }
+#endif
     const LabelFamily family = label_family();
     const int index = code - NOCTURNE_PAD_BUTTON_BASE;
 
@@ -550,17 +561,20 @@ extern "C" void nocturne_gamepad_apply_defaults(CGame *game) {
     game->key_next_item   = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
     game->key_next_ammo   = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_DPAD_UP);
     game->key_weapon_5    = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+#if defined(NOCTURNE_PS4)
+    // ScePad does not deliver the system PS button to the game.
+    game->key_item_desc   = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+#else
     game->key_item_desc   = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_GUIDE);
+#endif
 
     // The map, which does not live in CGame - see automap.h. Written here with
     // the rest of the pad defaults rather than in the automap shim, which has
     // no SDL, and after nocturne_automap_apply_default_binding() has put the
     // keyboard default in, exactly as CGame's own fields are overridden above.
     //
-    // Back is the map button by convention, and it is free because item
-    // information moved to Guide. Guide is not delivered by every driver and
-    // SDL can be told to keep it; if it does not arrive, the binding is still
-    // reachable from Customize Keys like any other.
+    // Back is the map button by convention. On native PS4 it represents
+    // touchpad click; item information uses R3 instead of the system button.
     *nocturne_automap_key_binding() = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_BACK);
 
     // Reachable by cycling with the shoulders; left free for the spare buttons
@@ -604,7 +618,19 @@ extern "C" void nocturne_gamepad_reseed_for_mode(CGame *game) {
     nocturne_gamepad_seed_calibration(game);
 
     int count = 0;
-    const int *fields = binding_fields(game, &count);
+    int *fields = binding_fields(game, &count);
+#if defined(NOCTURNE_PS4)
+    // Older native mappings exposed Touchpad as both Back and SDL Touchpad.
+    // Preserve every saved action while converging on the original Back code;
+    // the backend now emits that single code so key capture can complete.
+    const int old_touchpad = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_TOUCHPAD);
+    const int touchpad = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_BACK);
+    for (int i = 0; i < count; i++) {
+        if (fields[i] == old_touchpad) fields[i] = touchpad;
+    }
+    if (*nocturne_automap_key_binding() == old_touchpad)
+        *nocturne_automap_key_binding() = touchpad;
+#endif
 
     int pad_bindings = 0;
     int other_bindings = 0;
@@ -644,6 +670,18 @@ extern "C" void nocturne_gamepad_reseed_for_mode(CGame *game) {
              (int)game->game_control);
         core_game_cpp_CGame_restoreDefaultControls_FUN_004dbbc0(game);
     }
+#if defined(NOCTURNE_PS4)
+    // Repair the former default after loading an INI, without taking R3 from
+    // another custom action or changing a customized item-description binding.
+    const int r3 = NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_RIGHTSTICK);
+    if (wants_pad && game->key_item_desc == NOCTURNE_PAD_BUTTON(SDL_CONTROLLER_BUTTON_GUIDE)) {
+        bool r3_in_use = *nocturne_automap_key_binding() == r3;
+        for (int i = 0; i < count; i++) {
+            r3_in_use = r3_in_use || fields[i] == r3;
+        }
+        if (!r3_in_use) game->key_item_desc = r3;
+    }
+#endif
 }
 
 extern "C" void nocturne_gamepad_seed_calibration(CGame *game) {

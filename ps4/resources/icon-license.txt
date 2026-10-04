@@ -1,0 +1,5 @@
+PS4 package icon: generated from src/shims/core/window_icon_moon.h.
+Source photograph: SPD-HUBBLE-STScI-1999-14d, NASA/STScI, public domain.
+The existing 128 x 128 RGBA moon artwork is scaled to 512 x 512 and
+composited over a dark background. No original game artwork is included.
+Regenerate with: python3 ps4/resources/make_icon.py

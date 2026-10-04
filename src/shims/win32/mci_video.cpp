@@ -583,6 +583,7 @@ static void movie_present(AVFrame *src) {
                           s_movie.frame_rgb->linesize[0]);
         SDL_RenderClear(s_movie.renderer);
         SDL_RenderCopy(s_movie.renderer, s_movie.texture, nullptr, nullptr);
+        nocturne_smoke_before_sdl_present(SDL_RenderGetWindow(s_movie.renderer), s_movie.renderer);
         SDL_RenderPresent(s_movie.renderer);
     }
 }

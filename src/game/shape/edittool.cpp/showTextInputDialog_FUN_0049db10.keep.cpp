@@ -6,10 +6,22 @@
 // Signature: int __cdecl shape_edittool_cpp_showTextInputDialog_FUN_0049db10(char *dialog_title,char *input_buffer,int max_length,int flags,int dialog_mode)
 
 #include "nocturne.h"
+#if defined(NOCTURNE_PS4)
+#include "ime.h"
+#endif
 
 int __cdecl shape_edittool_cpp_showTextInputDialog_FUN_0049db10(char *dialog_title,char *input_buffer,int max_length,int flags,int dialog_mode)
 
 {
+#if defined(NOCTURNE_PS4)
+  // The console's system keyboard makes existing text prompts usable by pad.
+  // Basic Latin input is visible, including the recovered cheat-code prompt.
+  engine_2d_c_clearInputAndWait_FUN_00403260();
+  const int accepted = nocturne::ps4::show_text_input(
+      dialog_title, input_buffer, max_length, (flags & 1) != 0);
+  engine_2d_c_clearInputAndWait_FUN_00403260();
+  return accepted;
+#else
   int iVar1;
   char cVar2;
   int iVar2;
@@ -149,4 +161,5 @@ LAB_0049dddc:
   shape_edittool_cpp_CEdButton_dtor_FUN_004a6510(&local_1e0,0);
   shape_edittool_cpp_CEdButton_dtor_FUN_004a6510(&local_fc,0);
   return iVar6;
+#endif
 }

@@ -10,11 +10,14 @@
 #include "nocturne.h"
 #include "debug/dump.h"
 #include "renderer/trigl_gl.h"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#if !defined(NOCTURNE_PS4) && __has_include(<execinfo.h>)
 #include <execinfo.h>
+#define NOCTURNE_FOCUS_BACKTRACE 1
+#endif
 
 namespace {
 
@@ -38,10 +41,14 @@ unsigned delta(unsigned now, unsigned *last)
 
 void log_backtrace(void)
 {
+#if defined(NOCTURNE_FOCUS_BACKTRACE)
     void *frames[24];
     int n = backtrace(frames, 24);
     fflush(s_log);
     backtrace_symbols_fd(frames, n, fileno(s_log));
+#else
+    fprintf(s_log, "backtrace unavailable on this platform\n");
+#endif
 }
 
 } // namespace

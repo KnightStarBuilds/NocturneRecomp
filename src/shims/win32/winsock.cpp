@@ -38,7 +38,7 @@ extern "C" {
     int posix_setsockopt(int sockfd, int level, int optname,
                          const void* optval, unsigned int optlen);
     int posix_shutdown(int sockfd, int how);
-    int posix_close(int fd);
+    int nocturne_socket_close(int fd);
     int posix_ioctl(int fd, unsigned long request, void* argp);
     void* posix_gethostbyname(const char* name);
     unsigned long posix_inet_addr(const char* cp);
@@ -123,7 +123,7 @@ int bind(_SOCKET s, const struct SOCKADDR* addr, int namelen) {
 }
 
 int closesocket(_SOCKET s) {
-    return posix_close((int)s);
+    return nocturne_socket_close((int)s);
 }
 
 int connect(_SOCKET s, const struct SOCKADDR* name, int namelen) {

@@ -1,5 +1,6 @@
 #pragma once
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -10,6 +11,10 @@ struct StartupOptions {
     std::vector<std::string> game_args;
     bool help = false;
     bool print_paths = false;
+    std::optional<std::filesystem::path> smoke_dir;
+    std::optional<double> smoke_seconds;
+    std::optional<std::string> smoke_capture_at;
+    std::optional<std::string> smoke_keys;
 };
 StartupOptions parse_options(int argc, char** argv);
 std::filesystem::path executable_path();

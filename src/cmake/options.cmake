@@ -1,5 +1,12 @@
 # Configure shared compiler settings before any runtime or test targets.
 
+# Keep the numeric compile flag consistent across every target. Tests can
+# override this target property to exercise both policies in the same build.
+set(NOCTURNE_GAMEPAD_ONLY "${GAMEPAD_ONLY}")
+define_property(TARGET PROPERTY NOCTURNE_GAMEPAD_ONLY
+    INITIALIZE_FROM_VARIABLE NOCTURNE_GAMEPAD_ONLY)
+add_compile_definitions(GAMEPAD_ONLY=$<BOOL:$<TARGET_PROPERTY:NOCTURNE_GAMEPAD_ONLY>>)
+
 # Optional compiler cache; generated PCH timestamps otherwise defeat cache reuse.
 if(NOCTURNE_USE_CCACHE)
     find_program(CCACHE_PROGRAM ccache)
@@ -51,4 +58,3 @@ if(_nocturne_authentic_defs)
            "${_nocturne_authentic_defs}")
     message(STATUS "authenticity overrides: ${_nocturne_authentic_pretty}")
 endif()
-

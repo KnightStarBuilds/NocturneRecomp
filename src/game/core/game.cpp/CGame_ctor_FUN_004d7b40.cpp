@@ -20,7 +20,11 @@ CGame * __cdecl core_game_cpp_CGame_ctor_FUN_004d7b40(CGame *this_ptr)
   this_ptr->foul_language_flag = 1;
   this_ptr->shadow_flag = 1;
   this_ptr->quimby_flag = 0;
+#if GAMEPAD_ONLY
+  this_ptr->game_control = CONTROL_MODE_GAMEPAD;
+#else
   this_ptr->game_control = CONTROL_MODE_KEYBOARD;
+#endif
   core_game_cpp_CGame_restoreDefaultControls_FUN_004dbbc0(this_ptr);
   this_ptr->debug_info_string[0] = '\0';
   this_ptr->god_mode_enabled = 0;

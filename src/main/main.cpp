@@ -21,6 +21,9 @@
 #include <cstring>
 #include <exception>
 #include "runtime_paths.h"
+#if defined(NOCTURNE_PS4)
+#include "file_ops.h"
+#endif
 
 // Entries 0..154 are game static initializers (actor registration, vtable
 // setup, etc.). Entries 155..165 are Watcom CRT init handlers that we skip
@@ -49,6 +52,9 @@ static int wantsVersion(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+#if defined(NOCTURNE_PS4)
+    nocturne_ps4_startup_log();
+#endif
     if (wantsVersion(argc, argv)) {
         printf("%s\n", nocturne_version_line());
         return 0;
@@ -57,7 +63,11 @@ int main(int argc, char** argv)
     try {
         if (!nocturne::prepare_runtime(nocturne::parse_options(argc, argv))) return 0;
     } catch (const std::exception& error) {
+#if defined(NOCTURNE_PS4)
+        fprintf(nocturne_ps4_log_stream(stderr), "Nocturne: %s\n", error.what());
+#else
         fprintf(stderr, "Nocturne: %s\n", error.what());
+#endif
         return 2;
     }
 

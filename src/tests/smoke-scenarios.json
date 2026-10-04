@@ -9,6 +9,12 @@
     "capture_at": "1,5,10,20",
     "keys": "3:Escape"
   },
+  "controller-menu": {
+    "seconds": 120,
+    "capture_at": "5,20,40,60,90,115",
+    "keys": "3:Escape",
+    "purpose": "Bounded interactive controller and text-entry investigation. Navigate after opening skip with the host controller or emulator controller mapping, retain window captures of each transition, and inspect saved bindings. Timed captures and clean exit alone do not establish controller or IME success."
+  },
   "cursor-menus": {
     "seconds": 40,
     "capture_at": "5,20,26,26.07,26.14,26.21,28,34,38",
@@ -90,6 +96,18 @@
     "mission": "hq-act1.msn",
     "purpose": "Escape opens pause during the HQ intro; End chooses its final Skip cinematic entry, then Return. F2 and Return create a manual slot after the skip. Only use when captures show the intro is still letterboxed at 20 seconds.",
     "profile": "Fresh isolated profile. If the intro has already finished, End selects Quit instead; inspect and adjust timings before trusting this sequence."
+  },
+  "manual-slot-reload": {
+    "seconds": 45,
+    "capture_at": "5,7,9,11,15,25,40",
+    "keys": "3:Escape,6:Return,7:Down,7.5:Down,8:Return,10:Down,12:Return",
+    "purpose": "PLAY > LOAD > second slot. Supply a profile whose save directory contains only AUTO.NOC and SLOT01.NOC; inspect the 11-second capture to confirm Slot 1 is selected and the later scene to confirm reload. For ps4/validate.py use --game-profile; desktop smoke uses --user-dir."
+  },
+  "manual-slot-ime": {
+    "seconds": 100,
+    "capture_at": "5,9,11,25,35,60,90,95",
+    "keys": "3:Escape,6:Return,7:Down,7.5:Down,8:Return,10:Down,12:Return,40:Left Ctrl,40:F2",
+    "purpose": "Load manual Slot 1 from a profile whose save directory contains only AUTO.NOC and SLOT01.NOC, then Ctrl+F2 opens the filename dialog. On PS4, use the emulator's native IME to enter and accept a new filename; retain window captures and verify the resulting save file. Guest capture and scheduled-input processing stop while the IME blocks presentation; elapsed time continues, so dismiss it before the runner deadline."
   },
   "load-from-menu": {
     "seconds": 40,

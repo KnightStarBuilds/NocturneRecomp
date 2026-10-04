@@ -5,6 +5,7 @@
 #include "system/user32.h"
 #include "globals/globals_610000.h"
 #include "win32/shim_init.h"
+#include "shim_config.h"
 #include <SDL.h>
 #include <cstdint>
 #include <stdexcept>
@@ -140,12 +141,31 @@ NOCTURNE_TEST(set_cursor_hides_shows_and_returns_the_previous_handle) {
     CHECK_EQ(g_SetCursorFunc(nullptr), nullptr);
     CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_DISABLE);
     CHECK_EQ(g_SetCursorFunc(window.arrow), nullptr);
+#if GAMEPAD_ONLY
+    CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_DISABLE);
+#else
     CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_ENABLE);
+#endif
     CHECK_EQ(g_SetCursorFunc(window.arrow), window.arrow);
+#if GAMEPAD_ONLY
+    CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_DISABLE);
+#else
     CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_ENABLE);
+#endif
     CHECK_EQ(g_SetCursorFunc(nullptr), window.arrow);
     CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_DISABLE);
 }
+
+#if GAMEPAD_ONLY
+NOCTURNE_TEST(gamepad_only_hides_native_cursor_before_first_message_dispatch) {
+    Window window;
+    CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_DISABLE);
+    // Even a non-null Win32 cursor request cannot re-enable the native arrow.
+    SDL_ShowCursor(SDL_ENABLE);
+    g_SetCursorFunc(window.arrow);
+    CHECK_EQ(SDL_ShowCursor(SDL_QUERY), SDL_DISABLE);
+}
+#endif
 
 NOCTURNE_TEST(initial_cursor_request_precedes_window_activation) {
     Window window;

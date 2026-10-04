@@ -1,5 +1,11 @@
 #pragma once
 
+// Controller-only platforms hide every mouse pointer and lock the input mode.
+// Configure with -DGAMEPAD_ONLY=ON; PS4 builds always enable it.
+#ifndef GAMEPAD_ONLY
+#define GAMEPAD_ONLY 0
+#endif
+
 // =============================================================================
 // SHIM CONFIG — CONTROLLER TUNING
 // =============================================================================
@@ -9,7 +15,8 @@
 // shim_config_authentic.h as NOCTURNE_AUTHENTIC_GAMEPAD; everything here tunes
 // a feature that has no shipped answer to be faithful to.
 //
-// Nothing here is read when NOCTURNE_AUTHENTIC_GAMEPAD is 1.
+// The tuning below is unused when NOCTURNE_AUTHENTIC_GAMEPAD is 1;
+// GAMEPAD_ONLY remains an independent platform input policy.
 //
 // Included from shim_config.h, which is what nocturne.h reaches.
 

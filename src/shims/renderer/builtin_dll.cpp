@@ -29,14 +29,17 @@ extern "C" const NocturneBuiltinExport *nocturne_trigl_native_exports(int *count
 // Order here is the order the Graphics Options 3D-API selector cycles through.
 
 static const NocturneBuiltinModule g_BuiltinModules[] = {
+#if NOCTURNE_GL_PRESENT
     { "trigl.dll",    nocturne_trigl_native_exports },
+#endif
     // { "tridx6.dll", nocturne_tridx6_exports },
     // { "trid3d.dll", nocturne_trid3d_exports },
     // { "tri3dfx.dll", nocturne_tri3dfx_exports },
+    { nullptr, nullptr },  // Sentinel also keeps software-only builds standard C++.
 };
 
 static const int g_BuiltinModuleCount =
-    (int)(sizeof(g_BuiltinModules) / sizeof(g_BuiltinModules[0]));
+    (int)(sizeof(g_BuiltinModules) / sizeof(g_BuiltinModules[0])) - 1;
 
 // The game passes bare DLL names, but tolerate a path prefix so a value that
 // arrived via pod.ini's rendererDLLPath still matches.

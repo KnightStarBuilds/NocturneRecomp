@@ -73,7 +73,8 @@ int posix_shutdown(int sockfd, int how) {
     return shutdown(sockfd, how);
 }
 
-int posix_close(int fd) {
+// Keep this bridge distinct from the POSIX posix_close(int, int) declaration.
+int nocturne_socket_close(int fd) {
     return close(fd);
 }
 

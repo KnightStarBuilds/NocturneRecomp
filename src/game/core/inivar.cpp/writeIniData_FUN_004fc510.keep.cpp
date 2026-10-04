@@ -11,6 +11,9 @@ void __cdecl core_inivar_cpp_writeIniData_FUN_004fc510(void)
 
 {
   CIniFile local_210;
+#if GAMEPAD_ONLY
+  g_CGamePtr->game_control = CONTROL_MODE_GAMEPAD;
+#endif
 
   engine_ini_cpp_CIniFile_ctor_FUN_004fba70(&local_210,".\\system\\nocturne.ini",(char *)0x0);
   engine_ini_cpp_CIniFile_readIniHeader_FUN_004fbae0(&local_210,"Graphics");

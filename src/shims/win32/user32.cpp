@@ -28,6 +28,10 @@ static HCURSOR s_cursor = (HCURSOR)1;
 // Win32 asks the window procedure to choose its client-area cursor. The game
 // answers SetCursor(nullptr), since menus/dialogs draw their own pointers.
 static void queueSetCursor(unsigned int mouseMessage = 0) {
+#if GAMEPAD_ONLY
+    // Driver focus/enter events can restore the native arrow before dispatch.
+    SDL_ShowCursor(SDL_DISABLE);
+#endif
     MSG msg{};
     msg.hwnd = (HWND)(intptr_t)g_sdlWindow;
     msg.message = 0x0020; // WM_SETCURSOR
@@ -350,6 +354,10 @@ static HWND shim_CreateWindowExA(DWORD dwExStyle, LPCSTR lpClassName,
     // gl_present needs it to put a GL context on this window. Harmless when
     // NOCTURNE_GL_PRESENT is 0; the window just never gets a context.
     Uint32 flags = SDL_WINDOW_HIDDEN;
+#if defined(NOCTURNE_PS4) && NOCTURNE_PS4
+    // The PS4 backend owns the TV and exposes a 640x480 virtual desktop.
+    flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+#endif
 #if NOCTURNE_GL_PRESENT
     nocturne_gl_prepare_window();
     flags |= SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
@@ -547,8 +555,12 @@ static HCURSOR shim_SetCursor(HCURSOR hCursor) {
     s_cursor = hCursor;
     // LoadCursorA supplies a sentinel for the default arrow, not an SDL cursor.
     // SDL_SetCursor(nullptr) only refreshes the cursor; hiding requires ShowCursor.
+#if GAMEPAD_ONLY
+    SDL_ShowCursor(SDL_DISABLE);
+#else
     if (hCursor) SDL_SetCursor(SDL_GetDefaultCursor());
     SDL_ShowCursor(hCursor ? SDL_ENABLE : SDL_DISABLE);
+#endif
     return previous;
 }
 

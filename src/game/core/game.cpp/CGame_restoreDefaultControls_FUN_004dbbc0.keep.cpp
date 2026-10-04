@@ -10,6 +10,9 @@
 void __cdecl core_game_cpp_CGame_restoreDefaultControls_FUN_004dbbc0(CGame *this_ptr)
 
 {
+#if GAMEPAD_ONLY
+  this_ptr->game_control = CONTROL_MODE_GAMEPAD;
+#endif
   this_ptr->key_backup = 0x150;
   this_ptr->key_run = 0x2a;
   this_ptr->key_strafe = 0x38;

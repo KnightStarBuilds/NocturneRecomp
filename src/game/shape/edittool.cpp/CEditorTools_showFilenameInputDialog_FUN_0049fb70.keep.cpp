@@ -6,10 +6,20 @@
 // Signature: int __cdecl shape_edittool_cpp_CEditorTools_showFilenameInputDialog_FUN_0049fb70(CEditorTools *this_ptr,char *dialog_title,char *directory_path,char *file_extension,char *output_buffer,uint flags)
 
 #include "nocturne.h"
+#if defined(NOCTURNE_PS4)
+#include "ime.h"
+#endif
 
 int __cdecl shape_edittool_cpp_CEditorTools_showFilenameInputDialog_FUN_0049fb70(CEditorTools *this_ptr,char *dialog_title,char *directory_path,char *file_extension,char *output_buffer,uint flags)
 
 {
+#if defined(NOCTURNE_PS4)
+  engine_2d_c_clearInputAndWait_FUN_00403260();
+  const int accepted = nocturne::ps4::show_filename_input(
+      dialog_title, output_buffer, file_extension, (flags & 1) != 0);
+  engine_2d_c_clearInputAndWait_FUN_00403260();
+  return accepted;
+#else
   bool bVar3;
   int iVar5;
   char *pcVar2;
@@ -127,4 +137,5 @@ int __cdecl shape_edittool_cpp_CEditorTools_showFilenameInputDialog_FUN_0049fb70
   shape_edittool_cpp_CEditorTools_restoreWindowAndCleanup_FUN_004a0dd0(this_ptr);
   g_InputKeyMask = iVar5;
   return 1;
+#endif
 }

@@ -26,6 +26,7 @@ validation separately. Preserve recovered gameplay, CPU physics and cloth.
   Cached external sources are immutable; generated dependency build copies
   contain compiler output. Keep original game assets outside tracked source.
 - Preserve POD archive order; do not flatten assets into one directory.
+- If creating temporary files or scratch scripts without a dedicated scratchpad, place them inside a root `.tmp` folder (create if not present).
 
 ## Implementation and documentation
 

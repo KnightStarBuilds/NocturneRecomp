@@ -112,7 +112,7 @@ inline FILE* _dlog_get_file() {
 #if defined(_DLOG_HAS_ASAN)
 extern "C" void __sanitizer_print_stack_trace(void);
 inline void _dlog_print_backtrace() { __sanitizer_print_stack_trace(); }
-#elif defined(__GLIBC__) || defined(__APPLE__) || defined(__FreeBSD__)
+#elif !defined(NOCTURNE_PS4) && (defined(__GLIBC__) || defined(__APPLE__) || defined(__FreeBSD__))
 #include <execinfo.h>
 inline void _dlog_print_backtrace() {
     void* frames[64];

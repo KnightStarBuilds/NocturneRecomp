@@ -6,6 +6,10 @@
 // Signature: void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
 
 #include "nocturne.h"
+#include <climits>
+#if defined(NOCTURNE_PS4)
+#include "ps4_runtime.h"
+#endif
 
 void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
 
@@ -13,6 +17,9 @@ void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
   DWORD DVar2;
   CIniFile local_204;
   CGame *pCVar1;
+#if GAMEPAD_ONLY && !NOCTURNE_AUTHENTIC_GAMEPAD
+  int saved_map_binding = 0;
+#endif
 
   DVar2 = engine_dosio_cpp_setReadonlyAttribute_FUN_00600c30(".\\system\\nocturne.ini",0x180);
   if (DVar2 != 0) {
@@ -38,6 +45,10 @@ void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
             (&local_204,"useAGPFlag",&g_AGPTextureMode);
   engine_ini_cpp_CIniFile_getString_FUN_004fbb20
             (&local_204,"rendererDLLPath",g_RendererDllPath,0xfa);
+#if defined(NOCTURNE_PS4)
+  nocturne::ps4::apply_graphics(g_CGamePtr->game_pixx,g_CGamePtr->game_pixy,
+                              g_CGamePtr->game_bpp,g_UseDirect3D,g_RendererDllPath);
+#endif
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30(&local_204,"gamma",&g_CGamePtr->gamma);
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
             (&local_204,"heroNumber",(int *)&g_CGamePtr->hero_number);
@@ -71,6 +82,9 @@ void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
   engine_ini_cpp_CIniFile_readIniHeader_FUN_004fbae0(&local_204,"Control");
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
             (&local_204,"gameControl",(int *)&g_CGamePtr->game_control);
+#if GAMEPAD_ONLY
+  g_CGamePtr->game_control = CONTROL_MODE_GAMEPAD;
+#endif
   core_game_cpp_CGame_restoreDefaultControls_FUN_004dbbc0(g_CGamePtr);
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
             (&local_204,"keyWalk",&g_CGamePtr->key_walk);
@@ -79,8 +93,17 @@ void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30(&local_204,"keyRun",&g_CGamePtr->key_run)
   ;
 #if !NOCTURNE_AUTHENTIC_AUTOMAP
+#if GAMEPAD_ONLY && !NOCTURNE_AUTHENTIC_GAMEPAD
+  int imported_map = INT_MIN;
+  engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30(&local_204,"keyMap",&imported_map);
+  if (imported_map != INT_MIN) {
+    *nocturne_automap_key_binding() = imported_map;
+    saved_map_binding = 1;
+  }
+#else
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30(&local_204,"keyMap",
                                                  nocturne_automap_key_binding());
+#endif
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30(&local_204,"mapZoom",
                                                  nocturne_automap_zoom_setting());
 #endif
@@ -132,6 +155,15 @@ void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
             (&local_204,"keyItemDesc",&g_CGamePtr->key_item_desc);
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
             (&local_204,"keyNextAmmo",&g_CGamePtr->key_next_ammo);
+#if GAMEPAD_ONLY && !NOCTURNE_AUTHENTIC_GAMEPAD
+  // An imported keyboard-only map needs reachable pad defaults. Preserve
+  // existing pad/mixed bindings and read unrelated preferences afterwards.
+  const int default_map_binding = *nocturne_automap_key_binding();
+  if (!saved_map_binding) *nocturne_automap_key_binding() = INPUT_NONE;
+  nocturne_gamepad_reseed_for_mode(g_CGamePtr);
+  if (!saved_map_binding && *nocturne_automap_key_binding() == INPUT_NONE)
+    *nocturne_automap_key_binding() = default_map_binding;
+#endif
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
             (&local_204,"invertMouseYAxis",&g_CGamePtr->invert_mouse_y_axis);
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
@@ -156,6 +188,9 @@ void __cdecl core_inivar_cpp_readIniData_FUN_004fbd90(void)
             (&local_204,"aimMode",(int *)&g_CGamePtr->aim_mode);
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
             (&local_204,"autoUseHealth",&g_CGamePtr->auto_use_health);
+#if GAMEPAD_ONLY && !NOCTURNE_AUTHENTIC_GAMEPAD
+  nocturne_gamepad_seed_calibration(g_CGamePtr);
+#endif
   engine_ini_cpp_CIniFile_readIniHeader_FUN_004fbae0(&local_204,"Debug");
   engine_ini_cpp_CIniFile_getInteger_FUN_004fbc30
             (&local_204,"logConsoleFlag",&g_CConsolePtr->file_logging_enabled);

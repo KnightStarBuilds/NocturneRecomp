@@ -10,6 +10,11 @@
 int __cdecl core_menu_cpp_checkAndCalibrateGamepad_FUN_00511840(void)
 
 {
+#if GAMEPAD_ONLY && !NOCTURNE_AUTHENTIC_GAMEPAD
+  g_CGamePtr->game_control = CONTROL_MODE_GAMEPAD;
+  nocturne_gamepad_seed_calibration(g_CGamePtr);
+  return 1;
+#endif
   CGame *pCVar1;
   char *pcVar2;
   int iVar3;
@@ -95,6 +100,10 @@ int __cdecl core_menu_cpp_checkAndCalibrateGamepad_FUN_00511840(void)
 LAB_00510743:
   pCVar1 = g_CGamePtr;
   g_CGamePtr->x_center = 0;
+#if GAMEPAD_ONLY
+  pCVar1->game_control = CONTROL_MODE_GAMEPAD;
+#else
   pCVar1->game_control = CONTROL_MODE_KEYBOARD;
+#endif
   return 0;
 }

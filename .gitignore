@@ -1,8 +1,8 @@
+.tmp/
 /build/
 /deps/cache/
 /data/
 /.local-memory/
-/Nocturne.1999.zip
 __pycache__/
 
 imgui.ini

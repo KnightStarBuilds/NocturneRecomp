@@ -29,13 +29,17 @@ void __cdecl core_menu_cpp_configureGraphicsOptions_FUN_00510c80(void)
   int local_1c [3];
   CGame *pCVar2;
   int iVar3;
-#if NOCTURNE_WINDOW_MODE_OPTION || NOCTURNE_OS_FONT_OPTION || !NOCTURNE_AUTHENTIC_MENU_FONT
+#if defined(NOCTURNE_PS4) || NOCTURNE_WINDOW_MODE_OPTION || NOCTURNE_OS_FONT_OPTION || !NOCTURNE_AUTHENTIC_MENU_FONT
   char *menu_ptrs [12];
   int extra_count;
   int menu_y;
   int menu_ch;
 #endif
-#if NOCTURNE_WINDOW_MODE_OPTION
+#if defined(NOCTURNE_PS4)
+  int menu_actions [9];
+  int base_count;
+#endif
+#if NOCTURNE_WINDOW_MODE_OPTION && !defined(NOCTURNE_PS4)
   char window_line [256];
   int window_item;
 #endif
@@ -176,6 +180,9 @@ LAB_00510e1f:
 #endif
     pcVar14 = support_newmsg_cpp_getLocalizedString_FUN_005441f0(pcVar14);
     _sprintf(g_GraphicsMenuTextBuffers[0],pcVar14);
+#if defined(NOCTURNE_PS4)
+    strcpy(g_GraphicsMenuTextBuffers[0],"Renderer : Software 640x480");
+#endif
     uVar3 = g_CGamePtr->halo_mode;
     if (uVar3 == 0) {
       pcVar14 = "Flashlight halo : Off";
@@ -300,11 +307,23 @@ LAB_00510f71:
     prev_pixx = g_CGamePtr->game_pixx;
     prev_pixy = g_CGamePtr->game_pixy;
 #endif
-#if NOCTURNE_WINDOW_MODE_OPTION || NOCTURNE_OS_FONT_OPTION || !NOCTURNE_AUTHENTIC_MENU_FONT
+#if defined(NOCTURNE_PS4) || NOCTURNE_WINDOW_MODE_OPTION || NOCTURNE_OS_FONT_OPTION || !NOCTURNE_AUTHENTIC_MENU_FONT
+#if defined(NOCTURNE_PS4)
+    // Console software rendering has no selectable acceleration, API, card or
+    // pixel format. Keep the original action numbers for the remaining rows.
+    base_count = 0;
+    for (iVar4 = 0; iVar4 < iVar7; iVar4++) {
+      if (iVar4 >= 2 && iVar4 <= 5) continue;
+      menu_actions[base_count] = iVar4;
+      menu_ptrs[base_count++] = g_GraphicsMenuTextPointers[iVar4];
+    }
+    extra_count = base_count;
+#else
     for (iVar4 = 0; iVar4 < iVar7; iVar4++) {
       menu_ptrs[iVar4] = g_GraphicsMenuTextPointers[iVar4];
     }
     extra_count = iVar7;
+#endif
 #if NOCTURNE_OS_FONT_OPTION
     _sprintf(os_font_line,"Text : %s",
              nocturne_os_font_name(nocturne_os_font_get()));
@@ -312,7 +331,7 @@ LAB_00510f71:
     menu_ptrs[extra_count] = os_font_line;
     extra_count = extra_count + 1;
 #endif
-#if NOCTURNE_WINDOW_MODE_OPTION
+#if NOCTURNE_WINDOW_MODE_OPTION && !defined(NOCTURNE_PS4)
     _sprintf(window_line,"Window : %s",
              nocturne_window_mode_name(nocturne_window_mode_get()));
     window_item = extra_count;
@@ -364,7 +383,7 @@ LAB_00510f71:
       iVar7 = -1;   /* consumed; matches no case below */
     }
 #endif
-#if NOCTURNE_WINDOW_MODE_OPTION
+#if NOCTURNE_WINDOW_MODE_OPTION && !defined(NOCTURNE_PS4)
     if (iVar7 == window_item) {
       if (g_MenuLeftRightPressed == 1) {
         nocturne_window_mode_cycle(-1);
@@ -389,8 +408,15 @@ LAB_00510f71:
     pCVar4 = g_CGamePtr;
     iVar6 = g_CurrentGraphicsBoard;
     iVar3 = g_GraphicsCardCount;
+#if defined(NOCTURNE_PS4)
+    if (iVar7 >= 0 && iVar7 < base_count) iVar7 = menu_actions[iVar7];
+#endif
     switch(iVar7) {
     case 0:
+#if defined(NOCTURNE_PS4)
+      // Fixed 640x480: larger CPU lightmap targets are unsupported.
+      break;
+#endif
 #if !NOCTURNE_AUTHENTIC_RESOLUTION_LIST
       nocturne_resolution_step(g_CGamePtr->game_pixx,g_CGamePtr->game_pixy,
                                (g_MenuLeftRightPressed == 1) ? -1 : 1,
@@ -528,6 +554,9 @@ LAB_0051164c:
       }
       break;
     case 2:
+#if defined(NOCTURNE_PS4)
+      break;
+#endif
 #if NOCTURNE_AUTHENTIC_D3D_OPTIONS
       g_GraphicsCardCount = 0;
       g_UseDirect3D = 0;
@@ -571,6 +600,9 @@ LAB_0051164c:
 #endif
       break;
     case 3:
+#if defined(NOCTURNE_PS4)
+      break;
+#endif
       if (g_GraphicsCardVendorIDs[g_CurrentGraphicsBoard] != 0x121a) {
 #if !NOCTURNE_AUTHENTIC_RENDERER_DLL
         // Cycle only over renderers this build has compiled in, so the selector
@@ -632,6 +664,9 @@ LAB_005116c3:
       }
       break;
     case 5:
+#if defined(NOCTURNE_PS4)
+      break;
+#endif
       if (g_CGamePtr->game_bpp == 0x10) {
         g_CGamePtr->game_bpp = 0x20;
         iVar6 = g_CurrentGraphicsBoard;

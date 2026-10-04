@@ -24,6 +24,10 @@ void __cdecl core_menu_cpp_configureCustomKeys_FUN_00511890(void)
 
   pacVar7 = g_ControlsMenuTextBuffers;
   local_14 = 0;
+#if GAMEPAD_ONLY
+  g_CGamePtr->game_control = CONTROL_MODE_GAMEPAD;
+  local_14 = 1;
+#endif
   core_game_cpp_CGame_saveClockTime_FUN_004d7d80(g_CGamePtr);
   iVar4 = 0;
   do {
@@ -118,6 +122,9 @@ LAB_00511b4c:
     pCVar3 = g_CGamePtr;
     switch(iVar5) {
     case 0:
+#if GAMEPAD_ONLY
+      break;
+#else
       if (g_MenuLeftRightPressed == 1) {
         EVar8 = g_CGamePtr->game_control - CONTROL_MODE_MOUSE;
         g_CGamePtr->game_control = EVar8;
@@ -139,6 +146,7 @@ LAB_00511b4c:
       core_game_cpp_CGame_restoreDefaultControls_FUN_004dbbc0(g_CGamePtr);
 #endif
       break;
+#endif
     case 1:
       core_menu_cpp_configureCustomKeyBindings_FUN_005138e0();
       break;

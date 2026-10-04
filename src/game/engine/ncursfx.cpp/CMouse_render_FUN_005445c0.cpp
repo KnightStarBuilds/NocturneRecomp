@@ -9,6 +9,11 @@
 void __cdecl engine_ncursfx_cpp_CMouse_render_FUN_005445c0(CMouse *this_ptr)
 
 {
+#if GAMEPAD_ONLY
+  // Controller-only builds retain mouse coordinates but draw no menu pointer.
+  (void)this_ptr;
+  return;
+#else
   int iVar1;
   CMouse *this_ptr_00;
   
@@ -53,4 +58,5 @@ void __cdecl engine_ncursfx_cpp_CMouse_render_FUN_005445c0(CMouse *this_ptr)
     }
   }
   return;
+#endif
 }

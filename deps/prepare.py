@@ -98,6 +98,8 @@ def main():
     parser.add_argument("--build-dir", type=Path, required=True)
     parser.add_argument("--offline", action="store_true")
     parser.add_argument("--verify-cache-only", action="store_true")
+    parser.add_argument("--target", choices=("desktop", "ps4"), default="desktop",
+                        help="Select target-specific dependencies (default: desktop)")
     args = parser.parse_args()
     build = args.build_dir.resolve()
     if build.parent != ROOT / "build":
@@ -109,6 +111,8 @@ def main():
         generated.mkdir(exist_ok=True)
     manifest = json.loads((ROOT / "deps/manifest.json").read_text())
     for dependency in manifest["dependencies"]:
+        if args.target not in dependency.get("targets", ["desktop", "ps4"]):
+            continue
         name = dependency["name"]
         archive = CACHE / dependency["archive"]
         expected = dependency["sha256"]

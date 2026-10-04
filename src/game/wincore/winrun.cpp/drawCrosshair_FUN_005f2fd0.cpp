@@ -9,6 +9,10 @@
 void __cdecl wincore_winrun_cpp_drawCrosshair_FUN_005f2fd0(void)
 
 {
+#if GAMEPAD_ONLY
+  // This cursor crosshair is separate from the menu/dialog pointer renderers.
+  return;
+#else
   int x;
   int y;
   int iVar1;
@@ -47,4 +51,5 @@ void __cdecl wincore_winrun_cpp_drawCrosshair_FUN_005f2fd0(void)
     iVar1 = iVar1 + 1;
   } while (iVar1 != x + 6);
   return;
+#endif
 }

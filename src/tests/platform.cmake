@@ -24,6 +24,8 @@ set(_native_search "${NOCTURNE_SHIMS_DIR}/core/file_search.cpp")
 native_shim_test(ascii_case shims/core/test_ascii_case.cpp)
 native_shim_test(walk_turn shims/game/test_walk_turn.cpp
     "${NOCTURNE_SHIMS_DIR}/game/walk_turn.cpp")
+native_shim_test(cpu_calibration cpu_calibration.cpp
+    "${NOCTURNE_GAME_DIR}/wincore/winrun.cpp/calibrateCPUSpeed_FUN_005f2b80.cpp")
 native_shim_test(path shims/watcom/test_path.cpp "${_native_path}")
 native_shim_test(file_search shims/core/test_file_search.cpp "${_native_path}" "${_native_search}")
 native_shim_test(watcom shims/watcom/test_watcom.cpp
@@ -42,6 +44,39 @@ native_shim_test(user32 shims/win32/test_user32.cpp
     "${NOCTURNE_GAME_DIR}/globals/globals_610000.cpp")
 target_link_libraries(native_user32 PRIVATE SDL2::SDL2)
 target_compile_definitions(native_user32 PRIVATE NOCTURNE_GL_PRESENT=0 SDL_MAIN_HANDLED)
+set_property(TARGET native_user32 PROPERTY NOCTURNE_GAMEPAD_ONLY OFF)
+native_shim_test(user32_gamepad_only shims/win32/test_user32.cpp
+    "${NOCTURNE_SHIMS_DIR}/win32/user32.cpp"
+    "${NOCTURNE_GAME_DIR}/globals/globals_610000.cpp")
+target_link_libraries(native_user32_gamepad_only PRIVATE SDL2::SDL2)
+target_compile_definitions(native_user32_gamepad_only PRIVATE NOCTURNE_GL_PRESENT=0 SDL_MAIN_HANDLED)
+set_property(TARGET native_user32_gamepad_only PROPERTY NOCTURNE_GAMEPAD_ONLY ON)
+
+# Exercise the real software pointer and crosshair renderers under both policies.
+foreach(_gamepad_only OFF ON)
+    native_shim_test(cursor_${_gamepad_only} cursor_rendering.cpp
+        "${NOCTURNE_GAME_DIR}/engine/ncursfx.cpp/CMouse_render_FUN_005445c0.cpp"
+        "${NOCTURNE_GAME_DIR}/shape/edittool.cpp/CEditorTools_drawMousePointer_FUN_004a1380.cpp"
+        "${NOCTURNE_GAME_DIR}/wincore/winrun.cpp/drawCrosshair_FUN_005f2fd0.cpp")
+    set_property(TARGET native_cursor_${_gamepad_only} PROPERTY NOCTURNE_GAMEPAD_ONLY ${_gamepad_only})
+endforeach()
+
+# Load/save and navigate the recovered Controls page under both build policies.
+foreach(_gamepad_only OFF ON)
+    native_shim_test(gamepad_policy_${_gamepad_only} gamepad_only.cpp
+        "${NOCTURNE_SHIMS_DIR}/game/gamepad.cpp"
+        "${NOCTURNE_GAME_DIR}/core/game.cpp/CGame_ctor_FUN_004d7b40.cpp"
+        "${NOCTURNE_GAME_DIR}/core/game.cpp/CGame_restoreDefaultControls_FUN_004dbbc0.keep.cpp"
+        "${NOCTURNE_GAME_DIR}/core/inivar.cpp/readIniData_FUN_004fbd90.keep.cpp"
+        "${NOCTURNE_GAME_DIR}/core/inivar.cpp/writeIniData_FUN_004fc510.keep.cpp"
+        "${NOCTURNE_GAME_DIR}/core/menu.cpp/configureCustomKeys_FUN_00511890.keep.cpp"
+        "${NOCTURNE_GAME_DIR}/core/menu.cpp/renderMenuAndGetChoice_FUN_00510000.keep.cpp"
+        "${NOCTURNE_GAME_DIR}/core/menu.cpp/calibrateGamepad_FUN_005104d0.keep.cpp"
+        "${NOCTURNE_GAME_DIR}/core/menu.cpp/checkAndCalibrateGamepad_FUN_00511840.keep.cpp")
+    set_property(TARGET native_gamepad_policy_${_gamepad_only} PROPERTY NOCTURNE_GAMEPAD_ONLY ${_gamepad_only})
+    target_compile_definitions(native_gamepad_policy_${_gamepad_only} PRIVATE NOCTURNE_DISABLE_DLOG SDL_MAIN_HANDLED)
+    target_link_libraries(native_gamepad_policy_${_gamepad_only} PRIVATE SDL2::SDL2)
+endforeach()
 
 # Compile the actual controller and recovered binding pipeline. The fixture
 # supplies only device sampling/focus and unrelated engine services.

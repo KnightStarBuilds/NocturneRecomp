@@ -14,7 +14,8 @@ void __cdecl wincore_winrun_cpp_calibrateCPUSpeed_FUN_005f2b80(void)
   int iVar3;
   MMRESULT MVar4;
   int iVar1;
-  uint uVar5;
+  // This loop measures work; an unused ordinary local is folded away in Release.
+  volatile uint uVar5;
   int local_18;
   int local_14;
   
@@ -46,7 +47,10 @@ void __cdecl wincore_winrun_cpp_calibrateCPUSpeed_FUN_005f2b80(void)
       uVar5 = uVar5 + 99;
     } while (uVar5 < 100000000);
     iVar3 = wincore_winrun_cpp_getTime_FUN_005f2dc0();
-    local_18 = local_18 + 0x7080000U / (uint)(iVar3 - iVar2);
+    // Counter wrap is unsigned. A quantized clock may report the same tick;
+    // bound that estimate at one tick without changing the game timer itself.
+    const uint elapsed = (uint)iVar3 - (uint)iVar2;
+    local_18 = local_18 + 0x7080000U / (elapsed != 0 ? elapsed : 1U);
     local_14 = local_14 + 1;
   } while (local_14 < 5);
   g_CalibratedCPUSpeed = local_18 / 5;

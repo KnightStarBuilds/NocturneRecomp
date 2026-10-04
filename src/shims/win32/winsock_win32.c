@@ -117,7 +117,7 @@ int posix_shutdown(int sockfd, int how) {
     return shutdown(SOCK(sockfd), how);
 }
 
-int posix_close(int fd) {
+int nocturne_socket_close(int fd) {
     return closesocket(SOCK(fd));
 }
 
