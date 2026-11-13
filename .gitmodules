@@ -1,0 +1,3 @@
+[submodule "deps/kstar_gfx"]
+	path = deps/kstar_gfx
+	url = https://github.com/KnightStarBuilds/kstar_gfx.git

@@ -9,6 +9,12 @@ SDL_ttf's release archive also supplies its vendored FreeType and HarfBuzz sourc
 The game source is tracked directly in `src/`; it is not downloaded by dependency
 preparation.
 
+The independent [kstar_gfx renderer](kstar_gfx/README.md) is tracked as a Git
+submodule with its own build, tests and editable OpenGNM/PSBC submodules. Initialize
+it with `git submodule update --init --recursive deps/kstar_gfx`. Nocturne's
+game renderer is not yet migrated to this library; its asset downloads, cooked
+resources and build outputs remain ignored inside that checkout.
+
 The PS4 target additionally selects the pinned OpenOrbis 0.5.4 LLVM 18 SDK
 archive with `--target=ps4`. Its compiler/linker are host LLVM tools; desktop
 macOS builds continue using Apple Clang. PS4 libraries are built in
