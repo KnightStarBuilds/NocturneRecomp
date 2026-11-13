@@ -101,4 +101,12 @@ environment. Native desktop builds and physical PS4 acceptance remain separate.
   filesystem/clock/thread diagnostics and check sustained gameplay performance.
   Use shadPS4 as the first gate; record console scene coverage separately from desktop results.
 
+## Standalone graphics library
+
+The lighting/effects implementation and its remaining rendering, packaging and
+platform validation work are tracked in
+[kstar_gfx progress](../deps/kstar_gfx/docs/PROGRESS.md). The library remains
+independent of Nocturne's active renderer; its checks do not close the gameplay,
+physics, cloth or campaign acceptance items above.
+
 See [README.md](../README.md) for setup and use.
