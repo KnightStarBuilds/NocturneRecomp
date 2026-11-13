@@ -5,6 +5,15 @@ A native C++23 port of Nocturne using SDL2 and OpenGL.
 The engine and platform code are tracked directly under `src/`. Builds use that
 source and pinned external dependencies; game assets are supplied separately.
 
+## Submodules
+
+This repo uses git submodules. Use the following command:
+
+```
+git clone --recurse-submodules https://github.com/KnightStarBuilds/NocturneRecomp.git
+```
+> For *kstar_gfx* build validation a custom *shadPS4* fork is required which needs a separate clone and build; it isn’t included by recursive submodule initialization.
+
 ## Prerequisites
 
 - An owned copy of Nocturne.
@@ -33,6 +42,14 @@ data/original/
 
 POD archives must be directly inside `data/original/`. See the
 [asset audit](docs/assets.md) for archive checks and lookup-order details.
+
+## Quickstart (if all prerequisites are met)
+
+```
+cd NocturneRecomp
+./build.sh --config=Release
+./deps/kstar_gfx/build.sh --config=Release
+```
 
 ## macOS — Apple Silicon
 
